@@ -3,6 +3,7 @@ package rmit.furtherprog.claimmanagementsystem.data.model.customer;
 import java.util.Set;
 
 public class PolicyOwner {
+    private String id;
     private String name;
     private Set<Customer> beneficiaries;
 
