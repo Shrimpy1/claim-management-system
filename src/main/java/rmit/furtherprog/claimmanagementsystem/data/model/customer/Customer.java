@@ -29,6 +29,12 @@ public abstract class Customer {
         this.claims = new ArrayList<Claim>();
     }
 
+    public Customer(String id, String fullName, InsuranceCard insuranceCard) {
+        this.id = id;
+        this.fullName = fullName;
+        this.insuranceCard = insuranceCard;
+    }
+
     public Customer(String id, String fullName, List<Claim> claims) {
         this.id = id;
         this.fullName = fullName;
@@ -57,6 +63,10 @@ public abstract class Customer {
     }
 
     //Setters
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public boolean setInsuranceCard(InsuranceCard card){
         this.insuranceCard = card;
         card.setCardHolder(this);

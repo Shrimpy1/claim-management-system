@@ -19,6 +19,23 @@ public class InsuranceCard {
         this.cardNumber = "";
     }
 
+    public InsuranceCard(String cardNumber, LocalDate expirationDate) {
+        this.cardNumber = cardNumber;
+        this.expirationDate = expirationDate;
+    }
+
+    public InsuranceCard(String cardNumber, Customer cardHolder, LocalDate expirationDate) {
+        this.cardNumber = cardNumber;
+        this.cardHolder = cardHolder;
+        this.expirationDate = expirationDate;
+    }
+
+    public InsuranceCard(String cardNumber, PolicyOwner policyOwner, LocalDate expirationDate) {
+        this.cardNumber = cardNumber;
+        this.policyOwner = policyOwner;
+        this.expirationDate = expirationDate;
+    }
+
     public InsuranceCard(String cardNumber, Customer cardHolder, PolicyOwner policyOwner, LocalDate expirationDate) {
         this.cardNumber = cardNumber;
         this.cardHolder = cardHolder;
@@ -41,6 +58,18 @@ public class InsuranceCard {
     }
 
     // Setters
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public void setPolicyOwner(PolicyOwner policyOwner) {
+        this.policyOwner = policyOwner;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
     public void setCardHolder(Customer cardHolder) {
         this.cardHolder = cardHolder;
     }

@@ -21,7 +21,7 @@ public class Claim {
     private Customer insuredPerson;
     private String cardNumber;
     private LocalDate examDate;
-    private List<Document> documents;
+    private List<String> documents;
     private double claimAmount;
     private ClaimStatus status;
     private BankingInfo receiverBankingInfo;
@@ -30,7 +30,7 @@ public class Claim {
     public Claim() {
         this.id = "";
         this.cardNumber = "";
-        this.documents = new ArrayList<Document>();
+        this.documents = new ArrayList<String>();
         this.claimAmount = 0;
         this.status = ClaimStatus.NEW;
     }
@@ -41,11 +41,11 @@ public class Claim {
         this.cardNumber = cardNumber;
         this.examDate = examDate;
         this.claimAmount = claimAmount;
-        this.documents = new ArrayList<Document>();
+        this.documents = new ArrayList<String>();
         this.status = ClaimStatus.NEW;
     }
 
-    public Claim(String id, LocalDate claimDate, String cardNumber, LocalDate examDate, List<Document> documents, double claimAmount, BankingInfo receiverBankingInfo) {
+    public Claim(String id, LocalDate claimDate, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, BankingInfo receiverBankingInfo) {
         this.id = id;
         this.claimDate = claimDate;
         this.cardNumber = cardNumber;
@@ -56,7 +56,7 @@ public class Claim {
         this.status = ClaimStatus.NEW;
     }
 
-    public Claim(String id, LocalDate claimDate, Customer insuredPerson, String cardNumber, LocalDate examDate, List<Document> documents, double claimAmount, BankingInfo receiverBankingInfo) {
+    public Claim(String id, LocalDate claimDate, Customer insuredPerson, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, BankingInfo receiverBankingInfo) {
         this.id = id;
         this.claimDate = claimDate;
         this.insuredPerson = insuredPerson;
@@ -84,7 +84,7 @@ public class Claim {
     public LocalDate getExamDate() {
         return examDate;
     }
-    public List<Document> getDocuments() {
+    public List<String> getDocuments() {
         return documents;
     }
     public double getClaimAmount() {
@@ -135,8 +135,8 @@ public class Claim {
     }
 
     // Manipulate Document List
-    public void addDocument(Document document){
+    public void addDocument(String document){
         this.documents.add(document);
     }
-    public void removeDocument(Document document) {this.documents.remove(document);}
+    public void removeDocument(String document) {this.documents.remove(document);}
 }

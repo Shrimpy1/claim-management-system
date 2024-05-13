@@ -19,6 +19,10 @@ public class Dependant extends Customer{
         super(id, name);
     }
 
+    public Dependant(String id, String fullName, InsuranceCard insuranceCard) {
+        super(id, fullName, insuranceCard);
+    }
+
     public Dependant(String id, String name, InsuranceCard insuranceCard, List<Claim> claims) {
         super(id, name, insuranceCard, claims);
     }

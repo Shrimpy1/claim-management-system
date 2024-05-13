@@ -4,23 +4,37 @@ import java.util.Set;
 
 public class PolicyOwner {
     private String id;
-    private String name;
+    private String fullName;
     private Set<Customer> beneficiaries;
 
-    public PolicyOwner(String name) {
-        this.name = name;
+    public PolicyOwner(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getName() {
-        return name;
+    public PolicyOwner(String id, String fullName) {
+        this.id = id;
+        this.fullName = fullName;
+    }
+
+    public PolicyOwner(String id, String fullName, Set<Customer> beneficiaries) {
+        this.id = id;
+        this.fullName = fullName;
+        this.beneficiaries = beneficiaries;
+    }
+
+    public String getId() {
+        return id;
+    }
+    public String getFullName() {
+        return fullName;
     }
 
     public Set<Customer> getBeneficiaries() {
         return beneficiaries;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void setBeneficiaries(Set<Customer> beneficiaries) {
