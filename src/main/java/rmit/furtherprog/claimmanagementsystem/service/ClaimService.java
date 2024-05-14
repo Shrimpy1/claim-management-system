@@ -1,6 +1,9 @@
 package rmit.furtherprog.claimmanagementsystem.service;
 
+import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.database.ClaimRepository;
+
+import java.util.List;
 
 public class ClaimService {
     private ClaimRepository repository;
@@ -11,5 +14,13 @@ public class ClaimService {
 
     public boolean createNewClaim(){
         return true;
+    }
+
+    public Claim getClaimById(String id){
+        return repository.getById(id);
+    }
+
+    public List<Claim> getAllClaim(){
+        return getAllClaim();
     }
 }

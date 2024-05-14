@@ -116,21 +116,7 @@ public class ClaimRepository {
     }
 
     private BankingInfo fetchBankingInfo(int id){
-        String sql = "SELECT * FROM banking_info WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                String bank = resultSet.getString("bank");
-                String name = resultSet.getString("name");
-                String number = resultSet.getString("number");
-                return new BankingInfo(bank, name, number);
-            } else {
-                throw new NoDataFoundException("No document found with id: " + id);
-            }
-        } catch (SQLException | NoDataFoundException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        BankingInfoRepository repo = new BankingInfoRepository(connection);
+        return repo.getById(id);
     }
 }

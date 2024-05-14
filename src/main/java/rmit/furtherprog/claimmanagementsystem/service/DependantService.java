@@ -13,8 +13,12 @@ public class DependantService {
         this.repository = repository;
     }
 
-    public Dependant getById(String id){
+    public Dependant getDependantById(String id){
         return repository.getById(id);
+    }
+
+    public List<Dependant> getAllDependants() {
+        return repository.getAll();
     }
 
 }
