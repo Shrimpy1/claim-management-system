@@ -2,6 +2,7 @@ package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.PolicyOwner;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.InsuranceCard;
+import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
 import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
@@ -25,12 +26,13 @@ public class InsuranceCardRepository {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return mapResultSetToInsuranceCard(resultSet);
+            } else {
+                throw new NoDataFoundException("No data found with input: " + number);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | NoDataFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     private InsuranceCard mapResultSetToInsuranceCard(ResultSet resultSet) throws SQLException {
@@ -38,19 +40,19 @@ public class InsuranceCardRepository {
         LocalDate expirationDate = DateParsing.stod(resultSet.getString("expiration_date"));
         String policyOwnerId = IdConverter.toCustomerId(resultSet.getInt("policy_owner_id"));
         PolicyOwnerRepository repo = new PolicyOwnerRepository(connection);
-        PolicyOwner policyOwner = repo.getByIdSummarized(policyOwnerId);
+        PolicyOwner policyOwner = repo.getByIdPartial(policyOwnerId);
 
         InsuranceCard card = new InsuranceCard(number, policyOwner, expirationDate);
         return card;
     }
 
-    public InsuranceCard getByNumberSummarized(String number) {
+    public InsuranceCard getByNumberPartial(String number) {
         String sql = "SELECT * FROM insurance_card WHERE number = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, number);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return mapResultSetToInsuranceCardSummarized(resultSet);
+                return mapResultSetToInsuranceCardPartial(resultSet);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,12 +61,12 @@ public class InsuranceCardRepository {
         return null;
     }
 
-    private InsuranceCard mapResultSetToInsuranceCardSummarized(ResultSet resultSet) throws SQLException {
+    private InsuranceCard mapResultSetToInsuranceCardPartial(ResultSet resultSet) throws SQLException {
         String number = resultSet.getString("number");
         LocalDate expirationDate = DateParsing.stod(resultSet.getString("expiration_date"));
         String policyOwnerId = IdConverter.toCustomerId(resultSet.getInt("policy_owner_id"));
         PolicyOwnerRepository repo = new PolicyOwnerRepository(connection);
-        PolicyOwner policyOwner = repo.getByIdSummarized(policyOwnerId);
+        PolicyOwner policyOwner = repo.getByIdPartial(policyOwnerId);
 
         InsuranceCard card = new InsuranceCard(number, policyOwner, expirationDate);
         return card;

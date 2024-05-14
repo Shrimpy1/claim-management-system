@@ -26,6 +26,20 @@ public class Policyholder extends Customer{
         this.dependants = new HashSet<Dependant>();
     }
 
+    public Policyholder(String id, String fullName, Set<Dependant> dependants) {
+        super(id, fullName);
+        this.dependants = dependants;
+    }
+
+    public Policyholder(String id, String fullName, List<Claim> claims) {
+        super(id, fullName, claims);
+    }
+
+    public Policyholder(String id, String fullName, List<Claim> claims, Set<Dependant> dependants) {
+        super(id, fullName, claims);
+        this.dependants = dependants;
+    }
+
     public Policyholder(String id, String name, InsuranceCard insuranceCard, List<Claim> claims, Set<Dependant> dependants) {
         super(id, name, insuranceCard, claims);
         this.dependants = dependants;

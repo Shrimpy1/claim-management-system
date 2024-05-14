@@ -35,28 +35,18 @@ public class Claim {
         this.status = ClaimStatus.NEW;
     }
 
-    public Claim(String id, LocalDate claimDate, String cardNumber, LocalDate examDate, double claimAmount) {
-        this.id = id;
-        this.claimDate = claimDate;
-        this.cardNumber = cardNumber;
-        this.examDate = examDate;
-        this.claimAmount = claimAmount;
-        this.documents = new ArrayList<String>();
-        this.status = ClaimStatus.NEW;
-    }
-
-    public Claim(String id, LocalDate claimDate, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, BankingInfo receiverBankingInfo) {
+    public Claim(String id, LocalDate claimDate, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, ClaimStatus status, BankingInfo receiverBankingInfo) {
         this.id = id;
         this.claimDate = claimDate;
         this.cardNumber = cardNumber;
         this.examDate = examDate;
         this.documents = documents;
         this.claimAmount = claimAmount;
+        this.status = status;
         this.receiverBankingInfo = receiverBankingInfo;
-        this.status = ClaimStatus.NEW;
     }
 
-    public Claim(String id, LocalDate claimDate, Customer insuredPerson, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, BankingInfo receiverBankingInfo) {
+    public Claim(String id, LocalDate claimDate, Customer insuredPerson, String cardNumber, LocalDate examDate, List<String> documents, double claimAmount, ClaimStatus status, BankingInfo receiverBankingInfo) {
         this.id = id;
         this.claimDate = claimDate;
         this.insuredPerson = insuredPerson;
@@ -64,7 +54,7 @@ public class Claim {
         this.examDate = examDate;
         this.documents = documents;
         this.claimAmount = claimAmount;
-        this.status = ClaimStatus.NEW;
+        this.status = status;
         this.receiverBankingInfo = receiverBankingInfo;
     }
 
