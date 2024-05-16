@@ -1,27 +1,30 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.data.model.provider;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class Manager {
-    private String id;
+    private int id;
     private String name;
     private Set<Surveyor> surveyors;
 
-    public Manager(String id, String name) {
+    public Manager(int id, String name) {
         this.id = id;
         this.name = name;
         this.surveyors = new HashSet<Surveyor>();
     }
 
-    public Manager(String id, String name, Set<Surveyor> surveyors) {
+    public Manager(int id, String name, Set<Surveyor> surveyors) {
         this.id = id;
         this.name = name;
         this.surveyors = surveyors;
     }
     
     // Getters
-    public String getId() {
+    public int getId() {
         return id;
     }
 

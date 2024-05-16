@@ -1,3 +1,6 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
@@ -9,7 +12,6 @@ import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DependantRepository {
     private Connection connection;

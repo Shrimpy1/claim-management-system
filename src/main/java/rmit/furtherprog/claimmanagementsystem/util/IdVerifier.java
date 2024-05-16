@@ -1,3 +1,6 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.util;
 
 public class IdVerifier {
@@ -6,7 +9,7 @@ public class IdVerifier {
     }
 
     public static boolean verifyClaimId(String claimId){
-        return claimId != null && claimId.matches("^c\\d{10}$");
+        return claimId != null && claimId.matches("^f\\d{10}$");
     }
 
     public static boolean verifyCardId(String cardId){

@@ -1,3 +1,6 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
@@ -9,9 +12,7 @@ import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class PolicyholderRepository {
     private Connection connection;
@@ -143,7 +144,7 @@ public class PolicyholderRepository {
             statement.setInt(1, databaseId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return mapResultSetToPolicyholderPartial(resultSet);
+                return mapResultSetToPolicyholderWithoutCard(resultSet);
             } else {
                 throw new NoDataFoundException("No data found with input: " + customerId);
             }

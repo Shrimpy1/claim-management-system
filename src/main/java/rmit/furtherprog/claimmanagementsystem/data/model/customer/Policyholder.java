@@ -1,3 +1,6 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.data.model.customer;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;

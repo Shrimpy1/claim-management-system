@@ -1,9 +1,11 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Customer;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.PolicyOwner;
-import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.InsuranceCard;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;

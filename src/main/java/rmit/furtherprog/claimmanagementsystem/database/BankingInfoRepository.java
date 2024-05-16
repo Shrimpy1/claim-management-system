@@ -1,9 +1,10 @@
+/**
+ * @author 26
+ */
 package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.BankingInfo;
-import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
-import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.*;
 
@@ -47,12 +48,12 @@ public class BankingInfoRepository {
                     newId = rs.getInt("id");
                     System.out.println("BankingInfo added successfully with ID: " + newId);
                 } else {
-                    throw new SQLException("Failed to retrieve the ID of the inserted BankingInfo.");
+                    throw new SQLException("Failed to retrieve the ID of the inserted banking info.");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Failed to add the claim.");
+            System.out.println("Failed to add the banking info.");
         }
 
         return newId;
@@ -69,13 +70,13 @@ public class BankingInfoRepository {
 
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
-                System.out.println("Claim updated successfully.");
+                System.out.println("Banking info updated successfully.");
             } else {
-                System.out.println("No claim found with the given ID.");
+                System.out.println("No banking info found with the given ID.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Failed to update the claim.");
+            System.out.println("Failed to update the banking info.");
         }
     }
 
