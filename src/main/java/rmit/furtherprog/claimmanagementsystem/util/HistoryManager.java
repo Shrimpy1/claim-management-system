@@ -1,35 +1,32 @@
 package rmit.furtherprog.claimmanagementsystem.util;
 
+import rmit.furtherprog.claimmanagementsystem.data.model.util.History;
 import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
+import rmit.furtherprog.claimmanagementsystem.database.HistoryRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 public class HistoryManager {
-    private Connection connection;
+    private static HistoryRepository repository;
 
-    public HistoryManager() throws SQLException {
-        this.connection = DatabaseManager.getConnection();
+    static {
+        try {
+            repository = new HistoryRepository(DatabaseManager.getConnection());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void write(String user_id, String user_type, String event) {
-        String insertSQL = "INSERT INTO history (user_id, user_type, event) VALUES (?, ?, ?)  RETURNING id";
+    private HistoryManager() {}
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
-            preparedStatement.setString(1, user_id);
-            preparedStatement.setString(2, user_type);
-            preparedStatement.setString(3, event);
+    public static List<History> getAllHistory(){
+        return repository.getAll();
+    }
 
-            int rowsUpdated = preparedStatement.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("History added successfully.");
-            } else {
-                throw new SQLException();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to record history.");
-        }
+    public static void write(String type, String event) {
+        repository.addToDatabase(type, event);
     }
 }

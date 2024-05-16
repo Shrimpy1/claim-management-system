@@ -6,6 +6,8 @@ package rmit.furtherprog.claimmanagementsystem.database;
 import rmit.furtherprog.claimmanagementsystem.data.model.provider.Manager;
 import rmit.furtherprog.claimmanagementsystem.data.model.provider.Surveyor;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
+import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.*;
 import java.util.List;
@@ -36,11 +38,28 @@ public class ManagerRepository {
                 }
                 return manager;
             } else {
-                throw new NoDataFoundException("No document found with id: " + id);
+                throw new NoDataFoundException("No manager found with id: " + id);
             }
         } catch (SQLException | NoDataFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteById(int id) {
+        String sql = "DELETE FROM manager WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            int rowsDelete = statement.executeUpdate();
+            if (rowsDelete > 0){
+                System.out.println("Deleted manager with ID: " + id);
+                HistoryManager.write("manager", "Deleted with ID: " + id);
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete manager.");
         }
     }
 
@@ -57,6 +76,7 @@ public class ManagerRepository {
                 if (rs.next()) {
                     newId = rs.getInt("id");
                     System.out.println("Manager added successfully with ID: " + newId);
+                    HistoryManager.write("manager", "Added with ID: " + manager.getId());
                 } else {
                     throw new SQLException("Failed to retrieve the ID of the inserted manager.");
                 }
@@ -81,6 +101,7 @@ public class ManagerRepository {
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Manager updated successfully.");
+                HistoryManager.write("manager", "Updated with ID: " + manager.getId());
             } else {
                 System.out.println("No manager found with the given ID.");
             }

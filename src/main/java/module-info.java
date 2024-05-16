@@ -20,6 +20,7 @@ module rmit.furtherprog.claimmanagementsystem {
     exports rmit.furtherprog.claimmanagementsystem.data.model.admin;
     exports rmit.furtherprog.claimmanagementsystem.data.model.prop;
     exports rmit.furtherprog.claimmanagementsystem.data.model.provider;
+    exports rmit.furtherprog.claimmanagementsystem.data.model.util;
     exports rmit.furtherprog.claimmanagementsystem.service;
     exports rmit.furtherprog.claimmanagementsystem.exception;
     exports rmit.furtherprog.claimmanagementsystem.ui;

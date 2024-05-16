@@ -9,6 +9,7 @@ import rmit.furtherprog.claimmanagementsystem.data.model.customer.PolicyOwner;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.InsuranceCard;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.Connection;
@@ -37,6 +38,23 @@ public class InsuranceCardRepository {
         } catch (SQLException | NoDataFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteById(String number) {
+        String sql = "DELETE FROM insurance_card WHERE number = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, number);
+            int rowsDelete = statement.executeUpdate();
+            if (rowsDelete > 0){
+                System.out.println("Deleted insurance card with number: " + number);
+                HistoryManager.write("insurance_card", "Deleted with number: " + number);
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete insurance card.");
         }
     }
 
@@ -100,6 +118,7 @@ public class InsuranceCardRepository {
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Insurance card updated successfully.");
+                HistoryManager.write("insurance_card", "Updated with number: " + card.getCardNumber());
             } else {
                 System.out.println("No insurance card found with the given card number.");
             }
@@ -123,6 +142,7 @@ public class InsuranceCardRepository {
             int rowsInserted = preparedStatement.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("Insurance card added successfully.");
+                HistoryManager.write("insurance_card", "Added with number: " + card.getCardNumber());
             } else {
                 throw new SQLException();
             }

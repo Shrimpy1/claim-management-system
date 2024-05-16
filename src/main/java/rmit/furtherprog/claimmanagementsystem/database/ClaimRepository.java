@@ -8,6 +8,7 @@ import rmit.furtherprog.claimmanagementsystem.data.model.prop.BankingInfo;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.*;
@@ -40,9 +41,42 @@ public class ClaimRepository {
         }
     }
 
+    public void deleteById(String claimId) {
+        int databaseId = IdConverter.fromClaimId(claimId);
+        String sql = "DELETE FROM claim WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, databaseId);
+            int rowsDelete = statement.executeUpdate();
+            if (rowsDelete > 0){
+                System.out.println("Deleted claim with ID: " + claimId);
+                HistoryManager.write("claim", "Deleted with ID: " + claimId);
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete claim.");
+        }
+    }
+
     public List<Claim> getAll() {
         List<Claim> claims = new ArrayList<>();
-        String sql = "SELECT * FROM dependant";
+        String sql = "SELECT * FROM claim";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Claim claim = mapResultSetToClaim(resultSet);
+                claims.add(claim);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return claims;
+    }
+
+    public List<Claim> getAllNew() {
+        List<Claim> claims = new ArrayList<>();
+        String sql = "SELECT * FROM claim WHERE status = 'NEW'";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -89,7 +123,7 @@ public class ClaimRepository {
 
     public List<Claim> getAllPartial() {
         List<Claim> claims = new ArrayList<>();
-        String sql = "SELECT * FROM dependant";
+        String sql = "SELECT * FROM claim";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -137,6 +171,7 @@ public class ClaimRepository {
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Claim updated successfully.");
+                HistoryManager.write("claim", "Updated with ID: " + claim.getId());
             } else {
                 System.out.println("No claim found with the given ID.");
             }
@@ -165,6 +200,7 @@ public class ClaimRepository {
                 if (rs.next()) {
                     newId = rs.getInt("id");
                     System.out.println("Claim added successfully with ID: " + newId);
+                    HistoryManager.write("claim", "Added successfully with ID: " + newId);
                 } else {
                     throw new SQLException("Failed to retrieve the ID of the inserted Claim.");
                 }

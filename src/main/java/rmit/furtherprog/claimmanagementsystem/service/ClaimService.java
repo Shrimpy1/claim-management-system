@@ -20,8 +20,12 @@ public class ClaimService {
         return repository.getById(id);
     }
 
-    public List<Claim> getAllClaim(){
+    public List<Claim> getAllClaims(){
         return repository.getAll();
+    }
+
+    public List<Claim> getNewClaims() {
+        return repository.getAllNew();
     }
 
     public void updateToDatabase(Claim claim) {

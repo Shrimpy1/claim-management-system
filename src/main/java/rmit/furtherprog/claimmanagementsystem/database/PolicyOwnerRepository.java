@@ -7,6 +7,7 @@ import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.PolicyOwner;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.sql.*;
@@ -35,6 +36,24 @@ public class PolicyOwnerRepository {
             throw new RuntimeException(e);
         }
         return null; // Customer not found
+    }
+
+    public void deleteById(String customerId) {
+        int databaseId = IdConverter.fromCustomerId(customerId);
+        String sql = "DELETE FROM policy_owner WHERE customer_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, databaseId);
+            int rowsDelete = statement.executeUpdate();
+            if (rowsDelete > 0){
+                System.out.println("Deleted policy owner with ID: " + customerId);
+                HistoryManager.write("policy_owner", "Deleted with ID: " + customerId);
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete policy owner.");
+        }
     }
 
     public List<PolicyOwner> getAll() {
@@ -138,6 +157,7 @@ public class PolicyOwnerRepository {
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Policy owner updated successfully.");
+                HistoryManager.write("policy_owner", "Updated with ID: " + policyOwner.getId());
             } else {
                 System.out.println("No policy owner found with the given ID.");
             }
@@ -160,6 +180,7 @@ public class PolicyOwnerRepository {
                 if (rs.next()) {
                     newId = rs.getInt("id");
                     System.out.println("Policy owner added successfully with ID: " + newId);
+                    HistoryManager.write("policy_owner", "Added with ID: " + policyOwner.getId());
                 } else {
                     throw new SQLException("Failed to retrieve the ID of the inserted policy owner.");
                 }

@@ -5,6 +5,7 @@ package rmit.furtherprog.claimmanagementsystem.database;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.BankingInfo;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 
 import java.sql.*;
 
@@ -34,6 +35,24 @@ public class BankingInfoRepository {
         }
     }
 
+    public void deleteById(int id){
+        String sql = "DELETE FROM banking_info WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+
+            int rowsDelete = statement.executeUpdate();
+            if (rowsDelete > 0){
+                System.out.println("Deleted banking info with ID: " + id);
+                HistoryManager.write("banking info", "Deleted with ID: " + id);
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete banking info.");
+        }
+    }
+
     public int addToDatabase(BankingInfo bankingInfo) {
         String insertSQL = "INSERT INTO banking_info (bank, name, number) VALUES (?, ?, ?)  RETURNING id";
         int newId = -1;
@@ -47,6 +66,7 @@ public class BankingInfoRepository {
                 if (rs.next()) {
                     newId = rs.getInt("id");
                     System.out.println("BankingInfo added successfully with ID: " + newId);
+                    HistoryManager.write("banking info", "Added successfully with ID: " + newId);
                 } else {
                     throw new SQLException("Failed to retrieve the ID of the inserted banking info.");
                 }
@@ -71,6 +91,7 @@ public class BankingInfoRepository {
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Banking info updated successfully.");
+                HistoryManager.write("banking info", "Updated with ID: " + bankingInfo.getId());
             } else {
                 System.out.println("No banking info found with the given ID.");
             }
@@ -78,12 +99,5 @@ public class BankingInfoRepository {
             e.printStackTrace();
             System.out.println("Failed to update the banking info.");
         }
-    }
-
-    public static void main(String[] args) throws SQLException {
-        BankingInfoRepository repository = new BankingInfoRepository(DatabaseManager.getConnection());
-        BankingInfo info = repository.getById(1);
-        info.setNumber("696969696969");
-        repository.updateDatabase(info);
     }
 }
