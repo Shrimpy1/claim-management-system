@@ -17,11 +17,15 @@ public class InsuranceCardService {
         return repository.getByNumber(cardNumber);
     }
 
-    public void updateToDatabase(InsuranceCard card) {
+    public void update(InsuranceCard card) {
         repository.updateDatabase(card);
     }
 
-    public void addToDatabase(InsuranceCard card) {
+    public void add(InsuranceCard card) {
         repository.addToDatabase(card);
+    }
+
+    public void delete(String number){
+        repository.deleteById(number);
     }
 }

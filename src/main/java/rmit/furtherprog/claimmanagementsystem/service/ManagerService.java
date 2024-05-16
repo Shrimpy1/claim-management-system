@@ -22,11 +22,11 @@ public class ManagerService {
         return repository.getById(id);
     }
 
-    public void updateToDatabase(Manager manager){
+    public void update(Manager manager){
         repository.updateDatabase(manager);
     }
 
-    public int addToDatabase(Manager manager){
+    public int add(Manager manager){
         return repository.addToDatabase(manager);
     }
 
@@ -38,5 +38,9 @@ public class ManagerService {
             }
         }
         return claimList;
+    }
+
+    public void delete(int id){
+        repository.deleteById(id);
     }
 }

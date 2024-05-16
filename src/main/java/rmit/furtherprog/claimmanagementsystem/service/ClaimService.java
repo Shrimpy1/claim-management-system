@@ -28,11 +28,15 @@ public class ClaimService {
         return repository.getAllNew();
     }
 
-    public void updateToDatabase(Claim claim) {
+    public void update(Claim claim) {
         repository.updateDatabase(claim);
     }
 
-    public String addToDatabase(Claim claim) {
+    public String add(Claim claim) {
         return IdConverter.toClaimId(repository.addToDatabase(claim));
+    }
+
+    public void delete(String id){
+        repository.deleteById(id);
     }
 }

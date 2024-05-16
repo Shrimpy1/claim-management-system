@@ -24,11 +24,15 @@ public class DependantService {
         return repository.getAll();
     }
 
-    public void updateToDatabase(Dependant dependant){
+    public void update(Dependant dependant){
         repository.updateDatabase(dependant);
     }
 
-    public String addToDatabase(Dependant dependant){
+    public String add(Dependant dependant){
         return IdConverter.toCustomerId(repository.addToDatabase(dependant));
+    }
+
+    public void delete(String id){
+        repository.deleteById(id);
     }
 }

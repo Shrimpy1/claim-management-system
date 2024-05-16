@@ -17,11 +17,15 @@ public class BankingInfoService {
         return repository.getById(id);
     }
 
-    public void updateToDatabase(BankingInfo bankingInfo){
+    public void update(BankingInfo bankingInfo){
         repository.updateDatabase(bankingInfo);
     }
 
-    public int addToDatabase(BankingInfo bankingInfo){
+    public int add(BankingInfo bankingInfo){
         return repository.addToDatabase(bankingInfo);
+    }
+
+    public void delete(int id){
+        repository.deleteById(id);
     }
 }

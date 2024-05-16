@@ -24,11 +24,15 @@ public class PolicyOwnerService {
         return repository.getAll();
     }
 
-    public void updateToDatabase(PolicyOwner policyOwner){
+    public void update(PolicyOwner policyOwner){
         repository.updateDatabase(policyOwner);
     }
 
-    public String addToDatabase(PolicyOwner policyOwner) {
+    public String add(PolicyOwner policyOwner) {
         return IdConverter.toCustomerId(repository.addToDatabase(policyOwner));
+    }
+
+    public void delete(String id){
+        repository.deleteById(id);
     }
 }

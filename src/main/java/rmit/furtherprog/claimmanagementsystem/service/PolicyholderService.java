@@ -24,11 +24,15 @@ public class PolicyholderService {
         return repository.getAll();
     }
 
-    public void updateToDatabase(Policyholder policyholder){
+    public void update(Policyholder policyholder){
         repository.updateDatabase(policyholder);
     }
 
-    public String addToDatabase(Policyholder policyholder){
+    public String add(Policyholder policyholder){
         return IdConverter.toCustomerId(repository.addToDatabase(policyholder));
+    }
+
+    public void delete(String id){
+        repository.deleteById(id);
     }
 }

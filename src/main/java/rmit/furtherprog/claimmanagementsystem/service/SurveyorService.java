@@ -20,12 +20,16 @@ public class SurveyorService {
         return repository.getById(id);
     }
 
-    public void updateToDatabase(Surveyor surveyor){
+    public void update(Surveyor surveyor){
         repository.updateDatabase(surveyor);
     }
 
-    public int addToDatabase(Surveyor surveyor){
+    public int add(Surveyor surveyor){
         return repository.addToDatabase(surveyor);
+    }
+
+    public void delete(int id){
+        repository.deleteById(id);
     }
 
     public void request(Claim claim, String message){
