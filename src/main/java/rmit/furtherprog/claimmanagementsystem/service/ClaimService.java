@@ -16,10 +16,6 @@ public class ClaimService {
         this.repository = repository;
     }
 
-    public boolean createNewClaim(){
-        return true;
-    }
-
     public Claim getClaimById(String id){
         return repository.getById(id);
     }
