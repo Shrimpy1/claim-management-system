@@ -13,4 +13,12 @@ public class BankingInfoService {
     public BankingInfo getBankingInfoById(int id){
         return repository.getById(id);
     }
+
+    public void updateToDatabase(BankingInfo bankingInfo){
+        repository.updateDatabase(bankingInfo);
+    }
+
+    public int addToDatabase(BankingInfo bankingInfo){
+        return repository.addToDatabase(bankingInfo);
+    }
 }

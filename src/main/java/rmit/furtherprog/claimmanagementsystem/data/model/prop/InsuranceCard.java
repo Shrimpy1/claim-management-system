@@ -58,10 +58,6 @@ public class InsuranceCard {
     }
 
     // Setters
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
-    }
-
     public void setPolicyOwner(PolicyOwner policyOwner) {
         this.policyOwner = policyOwner;
     }

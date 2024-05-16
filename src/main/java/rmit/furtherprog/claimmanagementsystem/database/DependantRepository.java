@@ -9,6 +9,7 @@ import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DependantRepository {
     private Connection connection;
@@ -131,6 +132,95 @@ public class DependantRepository {
         return dependant;
     }
 
+    public Dependant getByIdWithoutCard(String customerId) {
+        int databaseId = IdConverter.fromCustomerId(customerId);
+        String sql = "SELECT * FROM dependant WHERE customer_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, databaseId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return mapResultSetToDependantWithoutCard(resultSet);
+            } else {
+                throw new NoDataFoundException("No data found with input: " + customerId);
+            }
+        } catch (SQLException | NoDataFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Dependant mapResultSetToDependantWithoutCard(ResultSet resultSet) throws SQLException {
+        int id = resultSet.getInt("customer_id");
+        String customerId = IdConverter.toCustomerId(id);
+        String fullName = resultSet.getString("full_name");
+
+        List<Claim> claimList = new ArrayList<Claim>();
+        Array claimId = resultSet.getArray("claim");
+        if (claimId != null){
+            Integer[] claims = (Integer[]) claimId.getArray();
+            ClaimRepository cRepo = new ClaimRepository(connection);
+            for (Integer cid : claims){
+                Claim claim = cRepo.getByIdPartial(IdConverter.toClaimId(cid));
+                claimList.add(claim);
+            }
+        }
+
+        return new Dependant(customerId, fullName, claimList);
+    }
+
+    public void updateDatabase(Dependant dependant){
+        String updateSQL = "UPDATE dependant SET full_name = ?, insurance_card_number = ?, claim = ? WHERE customer_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
+            preparedStatement.setString(1, dependant.getFullName());
+            preparedStatement.setString(2, dependant.getInsuranceCard().getCardNumber());
+            Array claimIdArray = getClaimIdArray(dependant);
+            preparedStatement.setArray(3, claimIdArray);
+            preparedStatement.setInt(4, IdConverter.fromCustomerId(dependant.getId()));
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Dependant updated successfully.");
+            } else {
+                System.out.println("No dependant found with the given ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update the dependant.");
+        }
+    }
+
+    public int addToDatabase(Dependant dependant){
+        String insertSQL = "INSERT INTO dependant (full_name, insurance_card_number, claim) VALUES (?, ?, ?) RETURNING customer_id";
+        int newId = -1;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)){
+            preparedStatement.setString(1, dependant.getFullName());
+            preparedStatement.setString(2, dependant.getInsuranceCard().getCardNumber());
+            Array claimIdArray = getClaimIdArray(dependant);
+            preparedStatement.setArray(3, claimIdArray);
+
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    newId = rs.getInt("id");
+                    System.out.println("Dependant added successfully with ID: " + newId);
+                } else {
+                    throw new SQLException("Failed to retrieve the ID of the inserted Dependant.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add the dependant.");
+        }
+
+        return newId;
+    }
+
+    private Array getClaimIdArray(Dependant dependant) throws SQLException {
+        List<Integer> claimIds = dependant.getClaims().stream().map(claim -> IdConverter.fromClaimId(claim.getId())).toList();
+        return connection.createArrayOf("integer", claimIds.toArray(new Integer[0]));
+    }
+
     public static void main(String[] args) throws SQLException, NoDataFoundException {
         Connection cn = DatabaseManager.getConnection();
         DependantRepository repo = new DependantRepository(cn);
@@ -142,5 +232,8 @@ public class DependantRepository {
         for (Claim claim : d1.getClaims()){
             System.out.println(claim.getId());
         }
+        d1.setFullName("Ice Mint");
+        repo.updateDatabase(d1);
+
     }
 }

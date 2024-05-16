@@ -19,4 +19,12 @@ public class PolicyOwnerService {
     public List<PolicyOwner> getAllPolicyOwner(){
         return repository.getAll();
     }
+
+    public void updateToDatabase(PolicyOwner policyOwner){
+        repository.updateDatabase(policyOwner);
+    }
+
+    public int addToDatabase(PolicyOwner policyOwner) {
+        return repository.addToDatabase(policyOwner);
+    }
 }

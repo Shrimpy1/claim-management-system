@@ -21,6 +21,14 @@ public class ClaimService {
     }
 
     public List<Claim> getAllClaim(){
-        return getAllClaim();
+        return repository.getAll();
+    }
+
+    public void updateToDatabase(Claim claim) {
+        repository.updateDatabase(claim);
+    }
+
+    public int addToDatabase(Claim claim) {
+        return repository.addToDatabase(claim);
     }
 }

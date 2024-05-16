@@ -19,4 +19,12 @@ public class PolicyholderService {
     public List<Policyholder> getAllPolicyholder(){
         return repository.getAll();
     }
+
+    public void updateToDatabase(Policyholder policyholder){
+        repository.updateDatabase(policyholder);
+    }
+
+    public int addToDatabase(Policyholder policyholder){
+        return repository.addToDatabase(policyholder);
+    }
 }

@@ -6,10 +6,7 @@ import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.exception.NoDataFoundException;
 import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,7 +104,7 @@ public class PolicyOwnerRepository {
     }
 
     private void fetchBeneficiaries(PolicyOwner policyOwner){
-        String sql = "SELECT * FROM insurance_card WHERE policy_owner_id = ?";
+        String sql = "SELECT * FROM insurance_card WHERE policy_owner_id = ? AND card_holder_type = 'policyholder'";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, IdConverter.fromCustomerId(policyOwner.getId()));
             ResultSet results = statement.executeQuery();
@@ -122,8 +119,58 @@ public class PolicyOwnerRepository {
                 }
             }
         } catch (SQLException e) {
-            // Handle SQL exception (e.g., log error, throw custom exception)
             e.printStackTrace();
         }
+    }
+
+    public void updateDatabase(PolicyOwner policyOwner) {
+        String updateSQL = "UPDATE policy_owner SET full_name = ?, beneficiaries = ? WHERE customer_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
+            preparedStatement.setString(1, policyOwner.getFullName());
+            Array claimIdArray = getBeneficiariesIdArray(policyOwner);
+            preparedStatement.setArray(2, claimIdArray);
+            preparedStatement.setInt(3, IdConverter.fromCustomerId(policyOwner.getId()));
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Policy owner updated successfully.");
+            } else {
+                System.out.println("No policy owner found with the given ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update the policy owner.");
+        }
+    }
+
+    public int addToDatabase(PolicyOwner policyOwner){
+        String insertSQL = "INSERT INTO policy_owner (full_name, beneficiaries) VALUES (?, ?) RETURNING customer_id";
+        int newId = -1;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)){
+            preparedStatement.setString(1, policyOwner.getFullName());
+            Array beneficiariesIdArray = getBeneficiariesIdArray(policyOwner);
+            preparedStatement.setArray(4, beneficiariesIdArray);
+
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    newId = rs.getInt("id");
+                    System.out.println("Policy owner added successfully with ID: " + newId);
+                } else {
+                    throw new SQLException("Failed to retrieve the ID of the inserted policy owner.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add the policy owner.");
+        }
+
+        return newId;
+    }
+
+    private Array getBeneficiariesIdArray(PolicyOwner policyOwner) throws SQLException {
+        List<Integer> beneficiariesIds = policyOwner.getBeneficiaries().stream().map(customer -> IdConverter.fromCustomerId(customer.getId())).toList();
+        return connection.createArrayOf("integer", beneficiariesIds.toArray(new Integer[0]));
     }
 }

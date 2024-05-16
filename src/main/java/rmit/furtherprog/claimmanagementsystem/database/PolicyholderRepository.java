@@ -136,10 +136,109 @@ public class PolicyholderRepository {
         return policyholder;
     }
 
+    public Policyholder getByIdWithoutCard(String customerId) {
+        int databaseId = IdConverter.fromCustomerId(customerId);
+        String sql = "SELECT * FROM policyholder WHERE customer_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, databaseId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return mapResultSetToPolicyholderPartial(resultSet);
+            } else {
+                throw new NoDataFoundException("No data found with input: " + customerId);
+            }
+        } catch (SQLException | NoDataFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Policyholder mapResultSetToPolicyholderWithoutCard(ResultSet resultSet) throws SQLException {
+        int id = resultSet.getInt("customer_id");
+        String customerId = IdConverter.toCustomerId(id);
+        String fullName = resultSet.getString("full_name");
+
+        Policyholder policyholder = new Policyholder(customerId, fullName);
+        Array claimIdArr = resultSet.getArray("claim");
+        if (claimIdArr != null){
+            Integer[] claimIds = (Integer[]) claimIdArr.getArray();
+            ClaimRepository cRepo = new ClaimRepository(connection);
+            for (Integer cid : claimIds){
+                Claim claim = cRepo.getByIdPartial(IdConverter.toClaimId(cid));
+                claim.setInsuredPerson(policyholder);
+                policyholder.addClaim(claim);
+            }
+        }
+
+        return policyholder;
+    }
+
+    public void updateDatabase(Policyholder policyholder) {
+        String updateSQL = "UPDATE policyholder SET full_name = ?, insurance_card_number = ?, dependants = ?, claim = ? WHERE customer_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
+            preparedStatement.setString(1, policyholder.getFullName());
+            preparedStatement.setString(2, policyholder.getInsuranceCard().getCardNumber());
+            Array dependantIdArray = getDependantIdArray(policyholder);
+            preparedStatement.setArray(3, dependantIdArray);
+            Array claimIdArray = getClaimIdArray(policyholder);
+            preparedStatement.setArray(4, claimIdArray);
+            preparedStatement.setInt(5, IdConverter.fromCustomerId(policyholder.getId()));
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Policyholder updated successfully.");
+            } else {
+                System.out.println("No policyholder found with the given ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update the policyholder.");
+        }
+    }
+
+    public int addToDatabase(Policyholder policyholder){
+        String insertSQL = "INSERT INTO policyholder (full_name, insurance_card_number, dependants, claim) VALUES (?, ?, ?, ?) RETURNING customer_id";
+        int newId = -1;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)){
+            preparedStatement.setString(1, policyholder.getFullName());
+            preparedStatement.setString(2, policyholder.getInsuranceCard().getCardNumber());
+            Array dependantIdArray = getDependantIdArray(policyholder);
+            preparedStatement.setArray(3, dependantIdArray);
+            Array claimIdArray = getClaimIdArray(policyholder);
+            preparedStatement.setArray(4, claimIdArray);
+
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    newId = rs.getInt("id");
+                    System.out.println("Policyholder added successfully with ID: " + newId);
+                } else {
+                    throw new SQLException("Failed to retrieve the ID of the inserted policyholder.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add the policyholder.");
+        }
+
+        return newId;
+    }
+
+    private Array getClaimIdArray(Policyholder policyholder) throws SQLException {
+        List<Integer> claimIds = policyholder.getClaims().stream().map(claim -> IdConverter.fromClaimId(claim.getId())).toList();
+        return connection.createArrayOf("integer", claimIds.toArray(new Integer[0]));
+    }
+
+    private Array getDependantIdArray(Policyholder policyholder) throws SQLException {
+        List<Integer> dependantIds = policyholder.getDependants().stream().map(dependant -> IdConverter.fromCustomerId(dependant.getId())).toList();
+        return connection.createArrayOf("integer", dependantIds.toArray());
+    }
+
     public static void main(String[] args) throws SQLException, NoDataFoundException {
         Connection cn = DatabaseManager.getConnection();
         PolicyholderRepository repo = new PolicyholderRepository(cn);
-        Policyholder ph1 = repo.getById("c0000001");
+        Policyholder ph1 = repo.getById("c0000005");
         System.out.println(ph1.getFullName());
         System.out.println(ph1.getInsuranceCard().getPolicyOwner().getFullName());
         System.out.println(ph1.getInsuranceCard().getCardNumber());
@@ -150,5 +249,7 @@ public class PolicyholderRepository {
         for (Claim claim : ph1.getClaims()){
             System.out.println(claim.getId());
         }
+        ph1.setFullName("Nguyen Kiet");
+        repo.updateDatabase(ph1);
     }
 }

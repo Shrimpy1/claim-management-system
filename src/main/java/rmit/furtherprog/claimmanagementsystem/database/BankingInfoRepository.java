@@ -47,7 +47,6 @@ public class BankingInfoRepository {
                     newId = rs.getInt("id");
                     System.out.println("BankingInfo added successfully with ID: " + newId);
                 } else {
-                    System.out.println("Failed to add BankingInfo.");
                     throw new SQLException("Failed to retrieve the ID of the inserted BankingInfo.");
                 }
             }

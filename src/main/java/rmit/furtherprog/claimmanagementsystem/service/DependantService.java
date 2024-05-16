@@ -21,4 +21,11 @@ public class DependantService {
         return repository.getAll();
     }
 
+    public void updateToDatabase(Dependant dependant){
+        repository.updateDatabase(dependant);
+    }
+
+    public int addToDatabase(Dependant dependant){
+        return repository.addToDatabase(dependant);
+    }
 }

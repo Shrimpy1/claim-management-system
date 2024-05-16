@@ -164,7 +164,6 @@ public class ClaimRepository {
                     newId = rs.getInt("id");
                     System.out.println("Claim added successfully with ID: " + newId);
                 } else {
-                    System.out.println("Failed to add Claim.");
                     throw new SQLException("Failed to retrieve the ID of the inserted Claim.");
                 }
             }

@@ -16,4 +16,12 @@ public class InsuranceCardService {
     public InsuranceCard getInsuranceCardByNumber(String cardNumber){
         return repository.getByNumber(cardNumber);
     }
+
+    public void updateToDatabase(InsuranceCard card) {
+        repository.updateDatabase(card);
+    }
+
+    public void addToDatabase(InsuranceCard card) {
+        repository.addToDatabase(card);
+    }
 }
