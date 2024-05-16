@@ -9,5 +9,6 @@
     <file url="file://$PROJECT_DIR$/src/main/java/rmit/furtherprog/claimmanagementsystem/database/PolicyOwnerRepository.java" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/rmit/furtherprog/claimmanagementsystem/database/PolicyholderRepository.java" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/rmit/furtherprog/claimmanagementsystem/database/SurveyorRepository.java" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/rmit/furtherprog/claimmanagementsystem/util/HistoryManager.java" dialect="PostgreSQL" />
   </component>
 </project>
