@@ -5,6 +5,7 @@ package rmit.furtherprog.claimmanagementsystem.service;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
 import rmit.furtherprog.claimmanagementsystem.database.DependantRepository;
+import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class DependantService {
         repository.updateDatabase(dependant);
     }
 
-    public int addToDatabase(Dependant dependant){
-        return repository.addToDatabase(dependant);
+    public String addToDatabase(Dependant dependant){
+        return IdConverter.toCustomerId(repository.addToDatabase(dependant));
     }
 }

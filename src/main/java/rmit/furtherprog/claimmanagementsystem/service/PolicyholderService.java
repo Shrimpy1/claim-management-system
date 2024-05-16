@@ -5,6 +5,7 @@ package rmit.furtherprog.claimmanagementsystem.service;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.database.PolicyholderRepository;
+import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class PolicyholderService {
         repository.updateDatabase(policyholder);
     }
 
-    public int addToDatabase(Policyholder policyholder){
-        return repository.addToDatabase(policyholder);
+    public String addToDatabase(Policyholder policyholder){
+        return IdConverter.toCustomerId(repository.addToDatabase(policyholder));
     }
 }

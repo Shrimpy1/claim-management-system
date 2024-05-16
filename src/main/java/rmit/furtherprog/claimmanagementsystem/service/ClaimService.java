@@ -5,6 +5,7 @@ package rmit.furtherprog.claimmanagementsystem.service;
 
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.database.ClaimRepository;
+import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class ClaimService {
         repository.updateDatabase(claim);
     }
 
-    public int addToDatabase(Claim claim) {
-        return repository.addToDatabase(claim);
+    public String addToDatabase(Claim claim) {
+        return IdConverter.toClaimId(repository.addToDatabase(claim));
     }
 }
