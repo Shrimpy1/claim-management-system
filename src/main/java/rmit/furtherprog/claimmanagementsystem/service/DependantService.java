@@ -11,9 +11,23 @@ import java.util.List;
 
 public class DependantService {
     private DependantRepository repository;
+    private Dependant dependant;
 
     public DependantService(DependantRepository repository) {
         this.repository = repository;
+    }
+
+    public DependantService(DependantRepository repository, Dependant dependant) {
+        this.repository = repository;
+        this.dependant = dependant;
+    }
+
+    public Dependant getDependant() {
+        return dependant;
+    }
+
+    public void setDependant(Dependant dependant) {
+        this.dependant = dependant;
     }
 
     public Dependant getDependantById(String id){
@@ -22,6 +36,18 @@ public class DependantService {
 
     public List<Dependant> getAllDependants() {
         return repository.getAll();
+    }
+
+    public void update(){
+        repository.updateDatabase(dependant);
+    }
+
+    public String add(){
+        return IdConverter.toCustomerId(repository.addToDatabase(dependant));
+    }
+
+    public void delete(){
+        repository.deleteById(dependant.getId());
     }
 
     public void update(Dependant dependant){

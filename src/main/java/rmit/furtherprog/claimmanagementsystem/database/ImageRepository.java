@@ -9,18 +9,20 @@ import java.io.*;
 import java.net.*;
 
 import org.apache.pdfbox.rendering.PDFRenderer;
+import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.core.ResponseBytes;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javafx.embed.swing.SwingFXUtils;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.imageio.ImageIO;
 
@@ -31,7 +33,7 @@ public class ImageRepository {
     private static final String ACCESS_KEY = "9e1c51d78b6871f73d06a7e76d100eb7";
     private static final String SECRET_ACCESS_KEY = "a765011f644081dd0b23c75b0a1fd952e11199be66dd1e3d97931190bb00ae2a";
 
-    public static Image getImage(String fileName) throws IOException {
+    public static File getImage(String fileName) throws IOException {
         S3Client client = getClient();
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -40,18 +42,32 @@ public class ImageRepository {
                 .build();
 
         ResponseBytes<GetObjectResponse> objectBytes = client.getObjectAsBytes(getObjectRequest);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(objectBytes.asByteArray());
+//        ByteArrayInputStream inputStream = new ByteArrayInputStream(objectBytes.asByteArray());
+//
+//        PDDocument document = PDDocument.load(inputStream);
+//        PDFRenderer pdfRenderer = new PDFRenderer(document);
+//        BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(0, 300);
+//
+//        Image pdfImage = SwingFXUtils.toFXImage(bufferedImage, null);
+//
+//        document.close();
+//        client.close();
+//
+//        return pdfImage;
+        byte[] data = objectBytes.asByteArray();
 
-        PDDocument document = PDDocument.load(inputStream);
-        PDFRenderer pdfRenderer = new PDFRenderer(document);
-        BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(0, 300);
+        // Create a temporary file
+        File tempFile = File.createTempFile(System.getProperty("java.io.tmpdir"), fileName);
+        tempFile.deleteOnExit(); // Ensure the file is deleted when the JVM exits
 
-        Image pdfImage = SwingFXUtils.toFXImage(bufferedImage, null);
+        // Write the byte array to the file
+        try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
+            fileOutputStream.write(data);
+        }
 
-        document.close();
         client.close();
 
-        return pdfImage;
+        return tempFile;
     }
 
     public static void uploadFile(File file){
@@ -63,14 +79,14 @@ public class ImageRepository {
                 .build();
 
         client.putObject(putObjectRequest, RequestBody.fromFile(file));
-
+        HistoryManager.write("document", "Added document with filename: " + file.getName());
         client.close();
     }
 
     public static Image renderPdfImage(File file) throws IOException {
         PDDocument document = PDDocument.load(file);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
-        BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(0, 300);
+        BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(0, 600);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "png", outputStream);
@@ -81,6 +97,24 @@ public class ImageRepository {
         document.close();
 
         return pdfImage;
+    }
+
+    public static void deleteFile(String fileName) {
+        S3Client client = getClient();
+
+        try {
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(BUCKET_NAME)
+                    .key(fileName)
+                    .build();
+
+            client.deleteObject(deleteObjectRequest);
+
+            System.out.println("File deleted successfully!");
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+        }
     }
 
     private static S3Client getClient(){

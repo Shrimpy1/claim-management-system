@@ -11,9 +11,23 @@ import java.util.List;
 
 public class ClaimService {
     private ClaimRepository repository;
+    private Claim claim;
+
+    public Claim getClaim() {
+        return claim;
+    }
+
+    public void setClaim(Claim claim) {
+        this.claim = claim;
+    }
 
     public ClaimService(ClaimRepository repository) {
         this.repository = repository;
+    }
+
+    public ClaimService(ClaimRepository repository, Claim claim) {
+        this.repository = repository;
+        this.claim = claim;
     }
 
     public Claim getClaimById(String id){
@@ -26,6 +40,18 @@ public class ClaimService {
 
     public List<Claim> getNewClaims() {
         return repository.getAllNew();
+    }
+
+    public void update() {
+        repository.updateDatabase(claim);
+    }
+
+    public String add() {
+        return IdConverter.toClaimId(repository.addToDatabase(claim));
+    }
+
+    public void delete(){
+        repository.deleteById(claim.getId());
     }
 
     public void update(Claim claim) {

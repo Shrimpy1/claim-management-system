@@ -38,7 +38,7 @@ public class HistoryRepository {
         String type = resultSet.getString("type");
         String event = resultSet.getString("event");
 
-        return new History(id, type, timeStampt, event);
+        return new History(id, timeStampt, type, event);
     }
 
     public void addToDatabase(String type, String event){

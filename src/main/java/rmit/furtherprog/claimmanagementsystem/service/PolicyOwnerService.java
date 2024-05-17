@@ -11,9 +11,23 @@ import java.util.List;
 
 public class PolicyOwnerService {
     private PolicyOwnerRepository repository;
+    private PolicyOwner policyOwner;
 
     public PolicyOwnerService(PolicyOwnerRepository repository) {
         this.repository = repository;
+    }
+
+    public PolicyOwnerService(PolicyOwnerRepository repository, PolicyOwner policyOwner) {
+        this.repository = repository;
+        this.policyOwner = policyOwner;
+    }
+
+    public PolicyOwner getPolicyOwner() {
+        return policyOwner;
+    }
+
+    public void setPolicyOwner(PolicyOwner policyOwner) {
+        this.policyOwner = policyOwner;
     }
 
     public PolicyOwner getPolicyOwnerById(String id){
@@ -22,6 +36,18 @@ public class PolicyOwnerService {
 
     public List<PolicyOwner> getAllPolicyOwner(){
         return repository.getAll();
+    }
+
+    public void update(){
+        repository.updateDatabase(policyOwner);
+    }
+
+    public String add() {
+        return IdConverter.toCustomerId(repository.addToDatabase(policyOwner));
+    }
+
+    public void delete(){
+        repository.deleteById(policyOwner.getId());
     }
 
     public void update(PolicyOwner policyOwner){

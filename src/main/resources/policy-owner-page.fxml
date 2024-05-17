@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="center" spacing="10" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.2-ea" fx:controller="rmit.furtherprog.claimmanagementsystem.ui.PolicyOwnerPageController">
+    <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+
+    <Label style="-fx-font-size: 16px;" text="Policy Owner Page" />
+
+    <!-- Use HBox to arrange buttons horizontally -->
+    <HBox alignment="center" spacing="10">
+        <Button onAction="#handleUpdateInfo" text="Update Info" />
+        <Button onAction="#handleViewClaims" text="View Claims" />
+        <Button onAction="#handleFileClaim" text="File Claim" />
+        <Button onAction="#handleUpdateClaim" text="Update Claim" />
+        <Button onAction="#handleDeleteClaim" text="Delete Claim" />
+    </HBox>
+
+    <!-- Sections for various functionalities -->
+    <VBox fx:id="updateInfoSection" focusTraversable="true" managed="false" spacing="10" visible="false">
+        <Label style="-fx-font-size: 14px;" text="Update Information" />
+        <GridPane hgap="10" vgap="10">
+            <Label text="ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <TextField fx:id="idField" GridPane.columnIndex="1" GridPane.rowIndex="0" editable="false"/>
+
+            <Label text="Full Name:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Beneficiaries:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="beneficiaryField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Button onAction="#handleSubmitUpdateInfo" text="Submit" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </VBox>
+
+    <VBox fx:id="viewClaimsSection" managed="false" spacing="10" visible="false">
+        <Label style="-fx-font-size: 14px;" text="View Claims" />
+        <TextArea fx:id="claimsTextArea" editable="false" prefColumnCount="30" prefRowCount="10" />
+    </VBox>
+
+    <VBox fx:id="fileClaimSection" managed="false" spacing="10" visible="false">
+        <Label style="-fx-font-size: 14px;" text="File Claim" />
+        <TextArea fx:id="fileClaimTextArea" prefColumnCount="30" prefRowCount="10" />
+        <Button onAction="#handleSubmitFileClaim" text="Submit" />
+    </VBox>
+
+    <VBox fx:id="updateClaimSection" managed="false" spacing="10" visible="false">
+        <Label style="-fx-font-size: 14px;" text="Update Claim" />
+        <TextArea fx:id="updateClaimTextArea" prefColumnCount="30" prefRowCount="10" />
+        <Button onAction="#handleSubmitUpdateClaim" text="Submit" />
+    </VBox>
+
+    <VBox fx:id="deleteClaimSection" managed="false" spacing="10" visible="false">
+        <Label style="-fx-font-size: 14px;" text="Delete Claim" />
+        <TextArea fx:id="deleteClaimTextArea" prefColumnCount="30" prefRowCount="10" />
+        <Button onAction="#handleSubmitDeleteClaim" text="Submit" />
+    </VBox>
+</VBox>

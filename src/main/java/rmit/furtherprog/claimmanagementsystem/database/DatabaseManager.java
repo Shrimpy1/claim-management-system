@@ -25,21 +25,4 @@ public class DatabaseManager {
         Connection connection = DriverManager.getConnection(url, user, password);
         return connection;
     }
-
-    public static void main(String[] args) {
-        try {
-            // Get database connection
-            Connection connection = getConnection();
-            System.out.println("Connected to PostgreSQL database!");
-
-            // Use the connection for database operations (query execution, data retrieval, etc.)
-
-
-            // Close the connection when done
-            connection.close();
-            System.out.println("Connection closed.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

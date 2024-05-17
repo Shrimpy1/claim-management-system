@@ -28,17 +28,17 @@ public class HelloApplication extends Application {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
             File selectedFile = fileChooser.showOpenDialog(stage);
 
-            if (selectedFile != null) {
-                try {
-                    // Upload the file to Supabase
-                    ImageRepository.uploadFile(selectedFile);
-                    // Display the first page of the PDF as an image
-                    Image pdfImage = ImageRepository.renderPdfImage(selectedFile);
-                    imageView.setImage(pdfImage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (selectedFile != null) {
+//                try {
+//                    // Upload the file to Supabase
+//                    ImageRepository.uploadFile(selectedFile);
+//                    // Display the first page of the PDF as an image
+//                    Image pdfImage = ImageRepository.renderPdfImage(selectedFile);
+//                    imageView.setImage(pdfImage);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         });
 
         VBox root = new VBox(10, uploadButton, imageView);

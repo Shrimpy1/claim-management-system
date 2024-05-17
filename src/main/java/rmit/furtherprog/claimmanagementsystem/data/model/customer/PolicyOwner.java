@@ -3,6 +3,7 @@
  */
 package rmit.furtherprog.claimmanagementsystem.data.model.customer;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class PolicyOwner {
@@ -17,6 +18,7 @@ public class PolicyOwner {
     public PolicyOwner(String id, String fullName) {
         this.id = id;
         this.fullName = fullName;
+        this.beneficiaries = new HashSet<>();
     }
 
     public PolicyOwner(String id, String fullName, Set<Customer> beneficiaries) {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="rmit.furtherprog.claimmanagementsystem.ui.HistoryPageController"
+            prefHeight="400.0" prefWidth="600.0">
+    <TableView fx:id="historyTable" layoutX="50" layoutY="50" prefHeight="500" prefWidth="700">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID"/>
+            <TableColumn fx:id="timestampColumn" text="Timestamp"/>
+            <TableColumn fx:id="typeColumn" text="Type"/>
+            <TableColumn fx:id="eventColumn" text="Event"/>
+        </columns>
+    </TableView>
+</AnchorPane>

@@ -11,13 +11,39 @@ import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 
 public class SurveyorService {
     private SurveyorRepository repository;
+    private Surveyor surveyor;
 
     public SurveyorService(SurveyorRepository repository) {
         this.repository = repository;
     }
 
+    public SurveyorService(SurveyorRepository repository, Surveyor surveyor) {
+        this.repository = repository;
+        this.surveyor = surveyor;
+    }
+
+    public Surveyor getSurveyor() {
+        return surveyor;
+    }
+
+    public void setSurveyor(Surveyor surveyor) {
+        this.surveyor = surveyor;
+    }
+
     public Surveyor getSurveyorById(int id){
         return repository.getById(id);
+    }
+
+    public void update(){
+        repository.updateDatabase(surveyor);
+    }
+
+    public int add(){
+        return repository.addToDatabase(surveyor);
+    }
+
+    public void delete(){
+        repository.deleteById(surveyor.getId());
     }
 
     public void update(Surveyor surveyor){

@@ -56,7 +56,7 @@ public class AccountManager {
         }
     }
 
-    public static boolean verifyAccount(String username, String password){
+    public static String verifyAccount(String username, String password){
         String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -64,10 +64,16 @@ public class AccountManager {
             statement.setString(2, password);
 
             ResultSet resultSet = statement.executeQuery();
-            return resultSet.next();
+            if (resultSet.next()){
+                return resultSet.getString("account_type");
+            }
         } catch (SQLException e){
             e.printStackTrace();
         }
-        return false;
+        return null;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(verifyAccount("c0000001", "123"));
     }
 }
