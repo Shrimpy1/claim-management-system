@@ -19,8 +19,6 @@ import software.amazon.awssdk.core.ResponseBytes;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.awt.image.BufferedImage;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javafx.embed.swing.SwingFXUtils;
 
@@ -33,7 +31,7 @@ public class ImageRepository {
     private static final String ACCESS_KEY = "9e1c51d78b6871f73d06a7e76d100eb7";
     private static final String SECRET_ACCESS_KEY = "a765011f644081dd0b23c75b0a1fd952e11199be66dd1e3d97931190bb00ae2a";
 
-    public static File getImage(String fileName) throws IOException {
+    public static File getFile(String fileName) throws IOException {
         S3Client client = getClient();
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -56,11 +54,9 @@ public class ImageRepository {
 //        return pdfImage;
         byte[] data = objectBytes.asByteArray();
 
-        // Create a temporary file
-        File tempFile = File.createTempFile(System.getProperty("java.io.tmpdir"), fileName);
+        File tempFile = new File(System.getProperty("java.io.tmpdir"), fileName);
         tempFile.deleteOnExit(); // Ensure the file is deleted when the JVM exits
 
-        // Write the byte array to the file
         try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
             fileOutputStream.write(data);
         }
@@ -102,19 +98,14 @@ public class ImageRepository {
     public static void deleteFile(String fileName) {
         S3Client client = getClient();
 
-        try {
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(BUCKET_NAME)
-                    .key(fileName)
-                    .build();
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(BUCKET_NAME)
+                .key(fileName)
+                .build();
 
-            client.deleteObject(deleteObjectRequest);
+        client.deleteObject(deleteObjectRequest);
 
-            System.out.println("File deleted successfully!");
-
-        } catch (S3Exception e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-        }
+        System.out.println("File deleted successfully!");
     }
 
     private static S3Client getClient(){
@@ -125,5 +116,10 @@ public class ImageRepository {
                 .region(Region.of(REGION))
                 .credentialsProvider(() -> credentials)
                 .build();
+    }
+
+    public static void main(String[] args) throws IOException {
+        File file = getFile("test.pdf");
+        System.out.println(file.getName());
     }
 }

@@ -13,23 +13,24 @@ import javafx.event.ActionEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
+import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.BankingInfo;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
-import rmit.furtherprog.claimmanagementsystem.database.ClaimRepository;
-import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
-import rmit.furtherprog.claimmanagementsystem.database.DependantRepository;
-import rmit.furtherprog.claimmanagementsystem.database.ImageRepository;
+import rmit.furtherprog.claimmanagementsystem.database.*;
+import rmit.furtherprog.claimmanagementsystem.service.BankingInfoService;
 import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
+import rmit.furtherprog.claimmanagementsystem.util.Verifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PolicyholderPageController {
     private PolicyholderService service;
@@ -116,7 +117,6 @@ public class PolicyholderPageController {
         additionalContentContainer.getChildren().add(userInfo);
     }
 
-
     private void saveSelfInfo(String name) {
         clearAdditionalContent();
 
@@ -154,33 +154,98 @@ public class PolicyholderPageController {
         additionalContentContainer.getChildren().add(buttonsContainer);
     }
     private void handleFileClaim() {
-//        clearAdditionalContent();
-//
-//        TextField claimDateField = new TextField();
-//        TextField insuredPersonField = new TextField();
-//        TextField cardNumberField = new TextField();
-//        TextField examDateField = new TextField();
-//        Button uploadButton = new Button("Upload Document");
-//        uploadButton.setOnAction(event -> handleFileUpdate(uploadButton));
-//        TextField claimAmountField = new TextField();
-//        TextField receiverBankingInfoField = new TextField();
-//
-//        Button saveButton = new Button("Save");
-//        saveButton.setOnAction(event -> saveClaimDetails(claimDateField.getText(), insuredPersonField.getText(), cardNumberField.getText(), examDateField.getText(), uploadedFile != null ? uploadedFile.getName() : "", claimAmountField.getText(), receiverBankingInfoField.getText()));
-//
-//        VBox claimForm = new VBox(5);
-//        claimForm.getChildren().addAll(
-//                new Label("Claim Date:"), claimDateField,
-//                new Label("Insured Person:"), insuredPersonField,
-//                new Label("Card Number:"), cardNumberField,
-//                new Label("Exam Date:"), examDateField,
-//                new Label("Document:"), uploadButton,
-//                new Label("Claim Amount:"), claimAmountField,
-//                new Label("Receiver Banking Info:"), receiverBankingInfoField,
-//                saveButton
-//        );
-//
-//        additionalContentContainer.getChildren().add(claimForm);
+        clearAdditionalContent();
+
+        TextField claimDateField = new TextField();
+        TextField examDateField = new TextField();
+        TextField claimAmountField = new TextField();
+        TextField bankField = new TextField();
+        TextField bankingAccountField = new TextField();
+        TextField bankingNumberField = new TextField();
+
+        VBox claimForm = new VBox(5);
+        claimForm.getChildren().addAll(
+                new Label("Claim Date:"), claimDateField,
+                new Label("Exam Date:"), examDateField,
+                new Label("Claim Amount:"), claimAmountField,
+                new Label("Bank:"), bankField,
+                new Label("Banking account:"), bankingAccountField,
+                new Label("Banking number:"), bankingNumberField,
+                new Label("Documents:")
+        );
+
+        List<File> fileList = new ArrayList<>();
+        Button uploadNewButton = new Button("Upload New");
+        uploadNewButton.setOnAction(event -> handleMultipleFileUpload(fileList, claimForm, uploadNewButton));
+
+        claimForm.getChildren().add(uploadNewButton);
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            if (!(Verifier.verifyDate(examDateField.getText()) && Verifier.verifyDate(claimDateField.getText()))){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid date format");
+                alert.setContentText("Date values must follow format yyyy-MM-dd");
+                alert.showAndWait();
+            } else {
+                Policyholder currUser = service.getPolicyholder();
+                LocalDate claimDate = DateParsing.stod(claimDateField.getText());
+                LocalDate examDate = DateParsing.stod(examDateField.getText());
+                double claimAmount = Double.parseDouble(claimAmountField.getText());
+                BankingInfo bankingInfo = new BankingInfo(bankField.getText(), bankingAccountField.getText(), bankingNumberField.getText());
+                List<String> documents = fileList.stream().map(File::getName).toList();
+
+                for (File document : fileList) {
+                    ImageRepository.uploadFile(document);
+                }
+
+                try {
+                    Connection connection = DatabaseManager.getConnection();
+                    ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+                    BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+                    int newId = bankingInfoService.add();
+                    BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
+                    Claim newClaim = new Claim(claimDate, currUser, currUser.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
+                    claimService.add(newClaim);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<Hyperlink> documentLinks = new ArrayList<>();
+                for (File document : fileList) {
+                    Hyperlink documentLink = new Hyperlink(document.getName());
+                    documentLink.setOnAction(actionEvent -> {
+                        try {
+                            showImageView(document);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    documentLinks.add(documentLink);
+                }
+
+                VBox claimDetails = new VBox(5);
+                claimDetails.getChildren().addAll(
+                        new Label("Claim Date: " + claimDate),
+                        new Label("Insured Person: " + currUser.getFullName()),
+                        new Label("Insurance Card: " + currUser.getInsuranceCard().getCardNumber()),
+                        new Label("Exam Date: " + examDate),
+                        new Label("Documents: ")
+                );
+                claimDetails.getChildren().addAll(documentLinks);
+                claimDetails.getChildren().addAll(
+                        new Label("Claim Amount: " + claimAmount),
+                        new Label("Bank: " + bankingInfo.getBank()),
+                        new Label("Banking account: " + bankingInfo.getName()),
+                        new Label("Banking number: " + bankingInfo.getNumber())
+                );
+
+                clearAdditionalContent();
+                additionalContentContainer.getChildren().add(claimDetails);
+            }
+        });
+        additionalContentContainer.getChildren().addAll(claimForm, saveButton);
     }
 
     private void viewClaims() throws SQLException {
@@ -213,7 +278,8 @@ public class PolicyholderPageController {
             Hyperlink documentLink = new Hyperlink(document);
             documentLink.setOnAction(actionEvent -> {
                 try {
-                    showImageView(document);
+                    File file = ImageRepository.getFile(document);
+                    showImageView(file);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -237,12 +303,18 @@ public class PolicyholderPageController {
         );
 
         Button updateButton = new Button("Update");
-        updateButton.setOnAction(actionEvent -> handleUpdateClaim(claim));
+        updateButton.setOnAction(actionEvent -> {
+            try {
+                handleUpdateClaim(claim);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         additionalContentContainer.getChildren().addAll(claimDetails, updateButton);
     }
 
-    private void handleUpdateClaim(Claim claim) {
+    private void handleUpdateClaim(Claim claim) throws IOException {
         clearAdditionalContent();
         VBox updateForm = new VBox(5);
 
@@ -256,7 +328,8 @@ public class PolicyholderPageController {
         List<File> fileList = new ArrayList<>();
         VBox documentForm = new VBox(5);
         for (String document : claim.getDocuments()){
-            HBox row = createNewDocumentRow(fileList, document, documentForm);
+            File file = ImageRepository.getFile(document);
+            HBox row = createNewDocumentRow(fileList, file, documentForm);
             documentForm.getChildren().add(row);
         }
         Button uploadNewButton = new Button("Upload New");
@@ -277,28 +350,64 @@ public class PolicyholderPageController {
 
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
-            String claimDate = claimDateField.getText();
-            String examDate = examDateField.getText();
+            LocalDate claimDate = DateParsing.stod(claimDateField.getText());
+            LocalDate examDate = DateParsing.stod(examDateField.getText());
             double claimAmount = Double.parseDouble(claimAmountField.getText());
-            BankingInfo bankingInfo = new BankingInfo(bankField.getText(), bankingAccountField.getText(), bankingNumberField.getText());
-            String documents = fileList.stream().map(File::getName).collect(Collectors.joining(", "));
+            BankingInfo bankingInfo = new BankingInfo(claim.getReceiverBankingInfo().getId(), bankField.getText(), bankingAccountField.getText(), bankingNumberField.getText());
+            List<String> documents = fileList.stream().map(File::getName).toList();
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText(documents);
-            alert.showAndWait();
-            saveClaimDetails(updateForm);
+            for (String fileName : claim.getDocuments()){
+                ImageRepository.deleteFile(fileName);
+            }
+            for (File document : fileList){
+                ImageRepository.uploadFile(document);
+            }
+
+            claim.setClaimDate(claimDate);
+            claim.setExamDate(examDate);
+            claim.setClaimAmount(claimAmount);
+            claim.setDocuments(documents);
+
+            try {
+                Connection connection = DatabaseManager.getConnection();
+                ClaimService claimService = new ClaimService(new ClaimRepository(connection), claim);
+                BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+                bankingInfoService.update();
+                claimService.update();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            List<Hyperlink> documentLinks = new ArrayList<>();
+            for (String document : claim.getDocuments()){
+                Hyperlink documentLink = new Hyperlink(document);
+                documentLink.setOnAction(actionEvent -> {
+                    try {
+                        File file = ImageRepository.getFile(document);
+                        showImageView(file);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                documentLinks.add(documentLink);
+            }
+
+            VBox claimDetails = new VBox(5);
+            claimDetails.getChildren().addAll(
+                    new Label("Claim Date: " + claimDate),
+                    new Label("Exam Date: " + examDate),
+                    new Label("Claim Amount: " + claimAmount),
+                    new Label("Bank: " + bankingInfo.getBank()),
+                    new Label("Banking account: " + bankingInfo.getName()),
+                    new Label("Banking number: " + bankingInfo.getNumber()),
+                    new Label("Documents:"));
+            claimDetails.getChildren().addAll(documentLinks);
+
+            clearAdditionalContent();
+            additionalContentContainer.getChildren().add(claimDetails);
         });
 
         additionalContentContainer.getChildren().addAll(updateForm, saveButton);
-    }
-
-
-
-    private void saveClaimDetails(VBox updateForm) {
-        clearAdditionalContent();
-
     }
 
     public void handleManageDependantsButton() throws SQLException {
@@ -390,18 +499,6 @@ public class PolicyholderPageController {
         alert.showAndWait();
     }
 
-    private void showImageView(String fileName) throws IOException {
-//        Stage imageStage = new Stage();
-//
-//        ImageView imageView = new ImageView(ImageRepository.getImage(fileName));
-//        imageView.setFitWidth(800);
-//        imageView.setFitHeight(1000);
-//        VBox vbox = new VBox(imageView);
-//        Scene scene = new Scene(vbox);
-//        imageStage.setScene(scene);
-//        imageStage.show();
-    }
-
     private void showImageView(File file) throws IOException {
         Stage imageStage = new Stage();
         ImageView imageView = new ImageView(ImageRepository.renderPdfImage(file));
@@ -419,7 +516,7 @@ public class PolicyholderPageController {
         File newFile = fileChooser.showOpenDialog(button.getScene().getWindow());
         if (newFile != null) {
             if (newFile.getName().toLowerCase().endsWith(".pdf")) {
-                if (file != null){fileList.remove(file);}
+                fileList.remove(file);
                 fileList.add(newFile);
                 hyperlink.setText(newFile.getName());
                 hyperlink.setOnAction(actionEvent -> {
@@ -442,21 +539,17 @@ public class PolicyholderPageController {
         File file = fileChooser.showOpenDialog(button.getScene().getWindow());
         if (file != null) {
             if (file.getName().toLowerCase().endsWith(".pdf")) {
-                uploadedFiles.add(file);
+                form.getChildren().removeLast();
+                form.getChildren().addAll(createNewDocumentRow(fileList, file, form), button);
             } else {
                 System.err.println("File must be in PDF format.");
                 showError("File must be in PDF format.");
             }
-        } else {
-            button.setText("Empty");
         }
-
-        form.getChildren().removeLast();
-        assert file != null;
-        form.getChildren().addAll(createNewDocumentRow(fileList, file, form), button);
     }
 
     private HBox createNewDocumentRow(List<File> fileList, File file, VBox form){
+        fileList.add(file);
         Hyperlink documentLink = new Hyperlink(file.getName());
         documentLink.setOnAction(actionEvent -> {
             try {
@@ -474,25 +567,6 @@ public class PolicyholderPageController {
             form.getChildren().remove(hBox);
             fileList.remove(file);
         });
-        hBox.getChildren().add(removeButton);
-        return hBox;
-    }
-
-    private HBox createNewDocumentRow(List<File> fileList, String fileName, VBox form){
-        Hyperlink documentLink = new Hyperlink(fileName);
-        documentLink.setOnAction(actionEvent -> {
-            try {
-                showImageView(fileName);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        Button editButton = new Button("edit");
-        editButton.setOnAction(actionEvent -> handleFileUpdate(fileList, null, editButton, documentLink));
-        HBox hBox = new HBox(10);
-        hBox.getChildren().addAll(documentLink, editButton);
-        Button removeButton = new Button("remove");
-        removeButton.setOnAction(actionEvent -> form.getChildren().remove(hBox));
         hBox.getChildren().add(removeButton);
         return hBox;
     }

@@ -3,7 +3,10 @@
  */
 package rmit.furtherprog.claimmanagementsystem.util;
 
-public class IdVerifier {
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class Verifier {
     public static boolean verifyCustomerId(String customerId){
         return customerId != null && customerId.matches("^c\\d{7}$");
     }
@@ -14,5 +17,16 @@ public class IdVerifier {
 
     public static boolean verifyCardId(String cardId){
         return cardId != null && cardId.matches("^\\d{10}$");
+    }
+
+    public static boolean verifyDate(String date){
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        try {
+            dateFormatter.parse(date);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 }

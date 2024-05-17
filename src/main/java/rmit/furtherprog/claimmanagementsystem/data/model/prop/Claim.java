@@ -45,6 +45,7 @@ public class Claim {
         this.examDate = examDate;
         this.documents = documents;
         this.claimAmount = claimAmount;
+        this.status = ClaimStatus.NEW;
         this.receiverBankingInfo = receiverBankingInfo;
     }
 
@@ -135,6 +136,10 @@ public class Claim {
     }
     public void setInsuredPerson(Customer insuredPerson) {
         this.insuredPerson = insuredPerson;
+    }
+
+    public void setDocuments(List<String> documents) {
+        this.documents = documents;
     }
 
     // Manipulate Document List

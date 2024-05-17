@@ -21,6 +21,7 @@ import rmit.furtherprog.claimmanagementsystem.database.ImageRepository;
 import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -152,7 +153,8 @@ public class DependantPageController {
             Hyperlink documentLink = new Hyperlink(document);
             documentLink.setOnAction(actionEvent -> {
                 try {
-                    showImageView(document);
+                    File file = ImageRepository.getFile(document);
+                    showImageView(file);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -177,9 +179,9 @@ public class DependantPageController {
         additionalContentContainer.getChildren().add(claimDetails);
     }
 
-    private void showImageView(String fileName) throws IOException {
+    private void showImageView(File file) throws IOException {
         Stage imageStage = new Stage();
-        ImageView imageView = new ImageView(ImageRepository.getImage(fileName));
+        ImageView imageView = new ImageView(ImageRepository.renderPdfImage(file));
         imageView.setFitWidth(600);
         imageView.setFitHeight(800);
         VBox vbox = new VBox(imageView);
