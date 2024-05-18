@@ -10,14 +10,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import rmit.furtherprog.claimmanagementsystem.Main;
-import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
-import rmit.furtherprog.claimmanagementsystem.database.DependantRepository;
-import rmit.furtherprog.claimmanagementsystem.database.PolicyOwnerRepository;
-import rmit.furtherprog.claimmanagementsystem.database.PolicyholderRepository;
-import rmit.furtherprog.claimmanagementsystem.service.DependantService;
-import rmit.furtherprog.claimmanagementsystem.service.PolicyOwnerService;
-import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
+import rmit.furtherprog.claimmanagementsystem.database.*;
+import rmit.furtherprog.claimmanagementsystem.service.*;
 import rmit.furtherprog.claimmanagementsystem.util.AccountManager;
+import rmit.furtherprog.claimmanagementsystem.util.IdConverter;
+
+import java.sql.Connection;
 
 public class LoginController {
 
@@ -36,6 +34,7 @@ public class LoginController {
         String password = passwordField.getText();
 
         String validation = AccountManager.verifyAccount(username, password);
+        Connection connection = DatabaseManager.getConnection();
         if (validation != null) {
             showAlert("Login Successful", "Welcome, " + username + "!");
 
@@ -44,19 +43,29 @@ public class LoginController {
                     Main.showAdminPage();
                     break;
                 case "policy_owner":
-                    PolicyOwnerService policyOwnerService = new PolicyOwnerService(new PolicyOwnerRepository(DatabaseManager.getConnection()));
+                    PolicyOwnerService policyOwnerService = new PolicyOwnerService(new PolicyOwnerRepository(connection));
                     policyOwnerService.setPolicyOwner(policyOwnerService.getPolicyOwnerById(username));
                     Main.showPolicyOwnerPage(policyOwnerService);
                     break;
                 case "dependant":
-                    DependantService dependantService = new DependantService(new DependantRepository(DatabaseManager.getConnection()));
+                    DependantService dependantService = new DependantService(new DependantRepository(connection));
                     dependantService.setDependant(dependantService.getDependantById(username));
                     Main.showDependantPage(dependantService);
                     break;
                 case "policyholder":
-                    PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(DatabaseManager.getConnection()));
+                    PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
                     policyholderService.setPolicyholder(policyholderService.getPolicyholderById(username));
                     Main.showPolicyHolderPage(policyholderService);
+                    break;
+                case "manager":
+                    int managerId = IdConverter.fromEmployeeId(username);
+                    ManagerService managerService = new ManagerService(new ManagerRepository(connection));
+                    managerService.setManager(managerService.getManagerById(managerId));
+                    break;
+                case "surveyor":
+                    int surveyorId = IdConverter.fromEmployeeId(username);
+                    SurveyorService surveyorService = new SurveyorService(new SurveyorRepository(connection));
+                    surveyorService.setSurveyor(surveyorService.getSurveyorById(surveyorId));
                     break;
                 default:
                     showAlert("Error", "Invalid user role");

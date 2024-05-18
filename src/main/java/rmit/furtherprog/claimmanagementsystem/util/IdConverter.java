@@ -35,4 +35,9 @@ public class IdConverter {
             throw new IllegalArgumentException("Invalid claim ID format: " + customerId);
         }
     }
+
+    public static int fromEmployeeId(String customerId) {
+        String numericPart = customerId.substring(1); // Skip the 'f'
+        return Integer.parseInt(numericPart);
+    }
 }
