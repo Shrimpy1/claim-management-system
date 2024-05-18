@@ -1,7 +1,7 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
+import rmit.furtherprog.claimmanagementsystem.Main;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.database.ClaimRepository;
 import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
@@ -98,7 +99,7 @@ public class DependantPageController {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> saveSelfInfo(nameField.getText()));
 
-        VBox userInfo = new VBox(1);
+        VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(
                 new Label("Full name:"), nameField,
                 saveButton
@@ -116,7 +117,7 @@ public class DependantPageController {
 
         Label nameLabel = new Label("Full name: " + name);
 
-        VBox userInfo = new VBox(1);
+        VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(nameLabel);
 
         additionalContentContainer.getChildren().add(userInfo);
@@ -132,7 +133,7 @@ public class DependantPageController {
         }
 
         ClaimService claimService = new ClaimService(new ClaimRepository(DatabaseManager.getConnection()));
-        VBox claimsList = new VBox(claimIds.size());
+        VBox claimsList = new VBox(5);
         for (String claimId : claimIds) {
             Hyperlink claimLink = new Hyperlink(claimId);
             claimLink.setOnAction(event -> showClaimDetails(claimService.getClaimById(claimId)));

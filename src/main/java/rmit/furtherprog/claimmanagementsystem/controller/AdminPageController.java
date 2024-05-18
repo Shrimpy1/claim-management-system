@@ -1,7 +1,7 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import rmit.furtherprog.claimmanagementsystem.Main;
 import rmit.furtherprog.claimmanagementsystem.data.model.util.History;
 import rmit.furtherprog.claimmanagementsystem.util.HistoryManager;
 

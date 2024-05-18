@@ -1,13 +1,16 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import rmit.furtherprog.claimmanagementsystem.controller.DependantPageController;
+import rmit.furtherprog.claimmanagementsystem.controller.PolicyOwnerPageController;
+import rmit.furtherprog.claimmanagementsystem.controller.PolicyholderPageController;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyOwnerService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;

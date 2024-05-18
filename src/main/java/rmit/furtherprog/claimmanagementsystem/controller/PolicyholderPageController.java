@@ -1,7 +1,7 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.event.ActionEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import rmit.furtherprog.claimmanagementsystem.Main;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Dependant;
 import rmit.furtherprog.claimmanagementsystem.data.model.customer.Policyholder;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.BankingInfo;
@@ -77,7 +78,7 @@ public class PolicyholderPageController {
         Label titleLabel = new Label("Self Information");
         additionalContentContainer.getChildren().add(titleLabel);
 
-        HBox buttonsContainer = new HBox(10);
+        HBox buttonsContainer = new HBox(5);
         Button viewButton = new Button("View");
         Button updateButton = new Button("Update");
         buttonsContainer.getChildren().addAll(viewButton, updateButton);
@@ -94,7 +95,7 @@ public class PolicyholderPageController {
         Label fullName = new Label("Full name: " + service.getPolicyholder().getFullName());
         Label insuranceCardNumber = new Label("Insurance Card number: " + service.getPolicyholder().getInsuranceCard().getCardNumber());
 
-        VBox userInfo = new VBox(3);
+        VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(id, fullName, insuranceCardNumber);
 
         additionalContentContainer.getChildren().add(userInfo);
@@ -108,7 +109,7 @@ public class PolicyholderPageController {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> saveSelfInfo(nameField.getText()));
 
-        VBox userInfo = new VBox(1);
+        VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(
                 new Label("Full name:"), nameField,
                 saveButton
@@ -125,7 +126,7 @@ public class PolicyholderPageController {
 
         Label nameLabel = new Label("Full name: " + name);
 
-        VBox userInfo = new VBox(1);
+        VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(nameLabel);
 
         additionalContentContainer.getChildren().add(userInfo);
@@ -206,8 +207,19 @@ public class PolicyholderPageController {
                     BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
                     int newId = bankingInfoService.add();
                     BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
-                    Claim newClaim = new Claim(claimDate, currUser, currUser.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
-                    claimService.add(newClaim);
+                    Claim claim = new Claim(claimDate, currUser, currUser.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
+                    String newClaimId = claimService.add(claim);
+                    Claim newClaim = claimService.getClaimById(newClaimId);
+
+                    currUser.addClaim(newClaim);
+                    DependantService dependantService = new DependantService(new DependantRepository(connection));
+                    List<String> dependantIds = currUser.getDependants().stream().map(Dependant::getId).toList();
+                    for (String id : dependantIds){
+                        Dependant dependant = dependantService.getDependantById(id);
+                        dependant.addClaim(newClaim);
+                        dependantService.update(dependant);
+                    }
+                    service.update(currUser);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -257,7 +269,7 @@ public class PolicyholderPageController {
         }
 
         ClaimService claimService = new ClaimService(new ClaimRepository(DatabaseManager.getConnection()));
-        VBox claimsList = new VBox(claimIds.size());
+        VBox claimsList = new VBox(5);
         for (String claimId : claimIds) {
             Hyperlink claimLink = new Hyperlink(claimId);
             claimLink.setOnAction(event -> showClaimDetails(claimService.getClaimById(claimId)));
@@ -423,7 +435,7 @@ public class PolicyholderPageController {
 
         DependantService dependantService = new DependantService(new DependantRepository(DatabaseManager.getConnection()));
 
-        VBox dependantsList = new VBox(dependantIds.size());
+        VBox dependantsList = new VBox(5);
         for (String dependantId : dependantIds) {
             Hyperlink dependantLink = new Hyperlink(dependantId);
             dependantLink.setOnAction(event -> showDependantOptions(dependantService.getDependantById(dependantId)));
@@ -442,7 +454,7 @@ public class PolicyholderPageController {
         Label fullName = new Label("Full name: " + dependant.getFullName());
         Label insuranceCardNumber = new Label("Insurance Card number: " + dependant.getInsuranceCard().getCardNumber());
 
-        VBox dependantDetails = new VBox(3);
+        VBox dependantDetails = new VBox(5);
         dependantDetails.getChildren().addAll(id, fullName, insuranceCardNumber);
 
         Button updateButton = new Button("Update");

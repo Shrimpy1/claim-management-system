@@ -1,7 +1,7 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

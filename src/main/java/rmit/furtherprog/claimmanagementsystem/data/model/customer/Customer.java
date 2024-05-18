@@ -91,6 +91,9 @@ public abstract class Customer {
     public void removeClaim(Claim claim){
         this.claims.remove(claim);
     }
+    public void removeClaimById(String id){
+        claims.removeIf(claim -> claim.getId().equals(id));
+    }
 
     // Override for Set customization
     @Override

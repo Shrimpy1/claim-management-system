@@ -1,7 +1,7 @@
 /**
  * @author 26
  */
-package rmit.furtherprog.claimmanagementsystem.ui;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,7 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import rmit.furtherprog.claimmanagementsystem.data.model.customer.PolicyOwner;
+import rmit.furtherprog.claimmanagementsystem.Main;
 import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
 import rmit.furtherprog.claimmanagementsystem.database.DependantRepository;
 import rmit.furtherprog.claimmanagementsystem.database.PolicyOwnerRepository;

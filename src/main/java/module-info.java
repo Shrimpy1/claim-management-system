@@ -23,6 +23,6 @@ module rmit.furtherprog.claimmanagementsystem {
     exports rmit.furtherprog.claimmanagementsystem.data.model.util;
     exports rmit.furtherprog.claimmanagementsystem.service;
     exports rmit.furtherprog.claimmanagementsystem.exception;
-    exports rmit.furtherprog.claimmanagementsystem.ui;
-    opens rmit.furtherprog.claimmanagementsystem.ui to javafx.fxml;
+    exports rmit.furtherprog.claimmanagementsystem.controller;
+    opens rmit.furtherprog.claimmanagementsystem.controller to javafx.fxml;
 }
