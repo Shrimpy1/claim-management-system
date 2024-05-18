@@ -9,9 +9,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import rmit.furtherprog.claimmanagementsystem.controller.DependantPageController;
+import rmit.furtherprog.claimmanagementsystem.controller.ManagerPageController;
 import rmit.furtherprog.claimmanagementsystem.controller.PolicyOwnerPageController;
 import rmit.furtherprog.claimmanagementsystem.controller.PolicyholderPageController;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
+import rmit.furtherprog.claimmanagementsystem.service.ManagerService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyOwnerService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
 
@@ -74,6 +76,18 @@ public class Main extends Application {
 
         primaryStage.setTitle("Dependant Page");
         primaryStage.setScene(new Scene(policyOwnerPage, 1000, 800));
+        primaryStage.show();
+    }
+
+    public static void showManagerPage(ManagerService service) throws Exception {
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/manager-page.fxml"));
+        Parent managerPage = loader.load();
+
+        ManagerPageController controller = loader.getController();
+        controller.setService(service);
+
+        primaryStage.setTitle("Manager Page");
+        primaryStage.setScene(new Scene(managerPage, 1000, 800));
         primaryStage.show();
     }
 

@@ -645,7 +645,10 @@ public class PolicyOwnerPageController {
         File file = fileChooser.showOpenDialog(button.getScene().getWindow());
         if (file != null) {
             if (file.getName().toLowerCase().endsWith(".pdf")) {
-                form.getChildren().removeLast();
+                if (!form.getChildren().isEmpty()) {
+                    // Remove the last child node from the form
+                    form.getChildren().remove(form.getChildren().size() - 1);
+                }
                 form.getChildren().addAll(createNewDocumentRow(fileList, file, form), button);
             } else {
                 System.err.println("File must be in PDF format.");
