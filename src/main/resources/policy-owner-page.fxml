@@ -5,22 +5,24 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rmit.furtherprog.claimmanagementsystem.controller.PolicyOwnerPageController">
-    <children>
-        <Label fx:id="welcomeLabel" styleClass="welcome-label" text="Welcome" />
-        <Button fx:id="logoutButton" onAction="#handleLogoutButtonAction" styleClass="logout-button" text="Logout" />
-        <VBox alignment="CENTER" spacing="10">
-            <Label styleClass="services-label" text="Our Services" />
-            <Button fx:id="selfInfoButton" onAction="#handleSelfInfoButton" styleClass="service-button" text="Self Information" />
-            <Button fx:id="manageClaimsButton" onAction="#handleManageClaimsButton" styleClass="service-button" text="Manage Claims" />
-            <Button fx:id="manageDependantsButton" onAction="#handleManageCustomersButton" styleClass="service-button" text="Manage Customer" />
-            <Button fx:id="calcYearlyButton" text="Calculate Yearly Payment" onAction="#handleCalcYearlyButton" />
-
-
-        </VBox>
-        <VBox fx:id="additionalContentContainer" alignment="CENTER" spacing="10" />
-    </children>
+<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="rmit.furtherprog.claimmanagementsystem.controller.PolicyOwnerPageController">
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
+        <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
+    <Label fx:id="welcomeLabel" text="Welcome"/>
+    <Button fx:id="logoutButton" onAction="#handleLogoutButtonAction" text="Logout"/>
+    <VBox alignment="CENTER" spacing="10">
+        <Label text="Our Services"/>
+        <Button fx:id="selfInfoButton" onAction="#handleSelfInfoButton"
+                text="Self Information"/>
+        <Button fx:id="manageClaimsButton" onAction="#handleManageClaimsButton"
+                text="Manage Claims"/>
+        <Button fx:id="manageDependantsButton" onAction="#handleManageCustomersButton"
+                text="Manage Customer"/>
+        <Button fx:id="calcYearlyButton" text="Calculate Yearly Payment" onAction="#handleCalcYearlyButton"/>
+
+
+    </VBox>
+    <VBox fx:id="additionalContentContainer" alignment="CENTER" spacing="10"/>
 </VBox>
