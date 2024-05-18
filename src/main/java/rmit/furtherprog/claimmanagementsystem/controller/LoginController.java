@@ -61,6 +61,7 @@ public class LoginController {
                     int managerId = IdConverter.fromEmployeeId(username);
                     ManagerService managerService = new ManagerService(new ManagerRepository(connection));
                     managerService.setManager(managerService.getManagerById(managerId));
+                    Main.showManagerPage(managerService);
                     break;
                 case "surveyor":
                     int surveyorId = IdConverter.fromEmployeeId(username);

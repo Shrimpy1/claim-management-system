@@ -418,17 +418,17 @@ public class PolicyholderPageController {
         Label titleLabel = new Label("Manage Dependants");
         additionalContentContainer.getChildren().add(titleLabel);
 
-        List<String> dependantIds = new ArrayList<>();
+        List<Dependant> dependants = new ArrayList<>();
         for (Dependant dependant : service.getPolicyholder().getDependants()){
-            dependantIds.add(dependant.getId());
+            dependants.add(dependant);
         }
 
         DependantService dependantService = new DependantService(new DependantRepository(connection));
 
         VBox dependantsList = new VBox(5);
-        for (String dependantId : dependantIds) {
-            Hyperlink dependantLink = new Hyperlink(dependantId);
-            dependantLink.setOnAction(event -> showDependantOptions(dependantService.getDependantById(dependantId)));
+        for (Dependant dependant : dependants) {
+            Hyperlink dependantLink = new Hyperlink(dependant.getFullName());
+            dependantLink.setOnAction(event -> showDependantOptions(dependantService.getDependantById(dependant.getId())));
             dependantsList.getChildren().add(dependantLink);
         }
         additionalContentContainer.getChildren().add(dependantsList);
@@ -541,7 +541,10 @@ public class PolicyholderPageController {
         File file = fileChooser.showOpenDialog(button.getScene().getWindow());
         if (file != null) {
             if (file.getName().toLowerCase().endsWith(".pdf")) {
-                form.getChildren().removeLast();
+                if (!form.getChildren().isEmpty()) {
+                    // Remove the last child node from the form
+                    form.getChildren().remove(form.getChildren().size() - 1);
+                }
                 form.getChildren().addAll(createNewDocumentRow(fileList, file, form), button);
             } else {
                 System.err.println("File must be in PDF format.");
