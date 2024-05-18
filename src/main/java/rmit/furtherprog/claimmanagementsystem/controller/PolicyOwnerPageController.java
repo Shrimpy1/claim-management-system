@@ -33,9 +33,15 @@ import java.util.*;
 
 public class PolicyOwnerPageController {
     private PolicyOwnerService service;
+    private Connection connection;
+
     public void setService(PolicyOwnerService service){
         this.service = service;
         welcomeLabel.setText("Welcome " + service.getPolicyOwner().getFullName());
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     @FXML
@@ -57,8 +63,8 @@ public class PolicyOwnerPageController {
     @FXML
     private Button calcYearlyButton;
 
-    public void initialize() {
-
+    public void initialize() throws SQLException {
+        setConnection(DatabaseManager.getConnection());
     }
 
     @FXML
@@ -141,11 +147,7 @@ public class PolicyOwnerPageController {
 
         fileButton.setOnAction(event -> handleFileClaim());
         viewButton.setOnAction(event -> {
-            try {
-                viewClaims();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            viewClaims();
         });
 
         buttonsContainer.getChildren().addAll(fileButton, viewButton);
@@ -205,69 +207,64 @@ public class PolicyOwnerPageController {
                     ImageRepository.uploadFile(document);
                 }
 
-                try {
-                    Connection connection = DatabaseManager.getConnection();
-                    ClaimService claimService = new ClaimService(new ClaimRepository(connection));
-                    BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
-                    int newId = bankingInfoService.add();
-                    BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
-                    PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
-                    Policyholder customer = policyholderService.getPolicyholderById(policyHolderId);
-                    Claim claim = new Claim(claimDate, customer, customer.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
-                    String newClaimId = claimService.add(claim);
-                    Claim newClaim = claimService.getClaimById(newClaimId);
+                ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+                BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+                int newId = bankingInfoService.add();
+                BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
+                PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
+                Policyholder customer = policyholderService.getPolicyholderById(policyHolderId);
+                Claim claim = new Claim(claimDate, customer, customer.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
+                String newClaimId = claimService.add(claim);
+                Claim newClaim = claimService.getClaimById(newClaimId);
 
-                    customer.addClaim(newClaim);
-                    DependantService dependantService = new DependantService(new DependantRepository(connection));
-                    List<String> dependantIds = customer.getDependants().stream().map(Dependant::getId).toList();
-                    for (String id : dependantIds){
-                        Dependant dependant = dependantService.getDependantById(id);
-                        dependant.addClaim(newClaim);
-                        dependantService.update(dependant);
-                    }
-                    policyholderService.update(customer);
-
-                    List<Hyperlink> documentLinks = new ArrayList<>();
-                    for (File document : fileList) {
-                        Hyperlink documentLink = new Hyperlink(document.getName());
-                        documentLink.setOnAction(actionEvent -> {
-                            try {
-                                showImageView(document);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-                        documentLinks.add(documentLink);
-                    }
-
-                    VBox claimDetails = new VBox(5);
-                    claimDetails.getChildren().addAll(
-                            new Label("New Claim Id: " + newClaimId),
-                            new Label("Insured Person: " + customer.getFullName()),
-                            new Label("Insurance Card: " + customer.getInsuranceCard().getCardNumber()),
-                            new Label("Claim Date: " + claimDate),
-                            new Label("Exam Date: " + examDate),
-                            new Label("Documents: ")
-                    );
-                    claimDetails.getChildren().addAll(documentLinks);
-                    claimDetails.getChildren().addAll(
-                            new Label("Claim Amount: " + claimAmount),
-                            new Label("Bank: " + bankingInfo.getBank()),
-                            new Label("Banking account: " + bankingInfo.getName()),
-                            new Label("Banking number: " + bankingInfo.getNumber())
-                    );
-
-                    clearAdditionalContent();
-                    additionalContentContainer.getChildren().add(claimDetails);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                customer.addClaim(newClaim);
+                DependantService dependantService = new DependantService(new DependantRepository(connection));
+                List<String> dependantIds = customer.getDependants().stream().map(Dependant::getId).toList();
+                for (String id : dependantIds){
+                    Dependant dependant = dependantService.getDependantById(id);
+                    dependant.addClaim(newClaim);
+                    dependantService.update(dependant);
                 }
+                policyholderService.update(customer);
+
+                List<Hyperlink> documentLinks = new ArrayList<>();
+                for (File document : fileList) {
+                    Hyperlink documentLink = new Hyperlink(document.getName());
+                    documentLink.setOnAction(actionEvent -> {
+                        try {
+                            showImageView(document);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    documentLinks.add(documentLink);
+                }
+
+                VBox claimDetails = new VBox(5);
+                claimDetails.getChildren().addAll(
+                        new Label("New Claim Id: " + newClaimId),
+                        new Label("Insured Person: " + customer.getFullName()),
+                        new Label("Insurance Card: " + customer.getInsuranceCard().getCardNumber()),
+                        new Label("Claim Date: " + claimDate),
+                        new Label("Exam Date: " + examDate),
+                        new Label("Documents: ")
+                );
+                claimDetails.getChildren().addAll(documentLinks);
+                claimDetails.getChildren().addAll(
+                        new Label("Claim Amount: " + claimAmount),
+                        new Label("Bank: " + bankingInfo.getBank()),
+                        new Label("Banking account: " + bankingInfo.getName()),
+                        new Label("Banking number: " + bankingInfo.getNumber())
+                );
+
+                clearAdditionalContent();
+                additionalContentContainer.getChildren().add(claimDetails);
             }
         });
         additionalContentContainer.getChildren().addAll(claimForm, saveButton);
     }
 
-    private void viewClaims() throws SQLException {
+    private void viewClaims() {
         clearAdditionalContent();
 
         Map<String, List<String>> claimList = new HashMap<>();
@@ -279,7 +276,7 @@ public class PolicyOwnerPageController {
             claimList.put(customer.getFullName(), claimIds);
         }
 
-        ClaimService claimService = new ClaimService(new ClaimRepository(DatabaseManager.getConnection()));
+        ClaimService claimService = new ClaimService(new ClaimRepository(connection));
 
         for (String name : claimList.keySet()) {
             VBox claimContainer = new VBox(5);
@@ -352,11 +349,7 @@ public class PolicyOwnerPageController {
             alert.getButtonTypes().setAll(buttonNo, buttonConfirm);
             Optional<ButtonType> answer = alert.showAndWait();
             if (answer.isPresent() && answer.get() == buttonConfirm){
-                try {
-                    handleDeleteClaim(claim);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                handleDeleteClaim(claim);
 
                 Alert newAlert = new Alert(Alert.AlertType.INFORMATION);
                 newAlert.setTitle("CLAIM DELETED");
@@ -424,15 +417,10 @@ public class PolicyOwnerPageController {
             claim.setClaimAmount(claimAmount);
             claim.setDocuments(documents);
 
-            try {
-                Connection connection = DatabaseManager.getConnection();
-                ClaimService claimService = new ClaimService(new ClaimRepository(connection), claim);
-                BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
-                bankingInfoService.update();
-                claimService.update();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            ClaimService claimService = new ClaimService(new ClaimRepository(connection), claim);
+            BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+            bankingInfoService.update();
+            claimService.update();
 
             List<Hyperlink> documentLinks = new ArrayList<>();
             for (String document : claim.getDocuments()){
@@ -466,9 +454,7 @@ public class PolicyOwnerPageController {
         additionalContentContainer.getChildren().addAll(updateForm, saveButton);
     }
 
-    public void handleDeleteClaim(Claim claim) throws SQLException {
-        Connection connection = DatabaseManager.getConnection();
-
+    public void handleDeleteClaim(Claim claim) {
         PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
         DependantService dependantService = new DependantService(new DependantRepository(connection));
 
@@ -488,78 +474,127 @@ public class PolicyOwnerPageController {
         clearAdditionalContent();
     }
 
-    public void handleManageDependantsButton() {
+    public void handleManageCustomersButton() {
         clearAdditionalContent();
-
         Label titleLabel = new Label("Manage Dependants");
         additionalContentContainer.getChildren().add(titleLabel);
 
-        // Mock dependant list
-        String[] dependants = {"Dependant 1", "Dependant 2", "Dependant 3"};
-        VBox dependantsList = new VBox(5);
-        for (String dependant : dependants) {
-            Hyperlink dependantLink = new Hyperlink(dependant);
-            dependantLink.setOnAction(event -> showDependantOptions(dependant));
-            dependantsList.getChildren().add(dependantLink);
+        List<String> idList = service.getPolicyOwner().getBeneficiaries().stream().filter(customer -> customer instanceof Policyholder).map(Customer::getId).toList();
+        PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
+        DependantService dependantService = new DependantService(new DependantRepository(connection));
+
+        VBox customerList = new VBox(5);
+        for (String id : idList) {
+            Policyholder policyholder = policyholderService.getPolicyholderById(id);
+
+            Hyperlink policyholderLink = new Hyperlink(policyholder.getFullName());
+            policyholderLink.setOnAction(event -> showPolicyholderOptions(policyholder));
+            customerList.getChildren().add(policyholderLink);
+
+            for (Dependant dependant : policyholder.getDependants()){
+                Hyperlink dependantLink = new Hyperlink("\t" + dependant.getFullName());
+                dependantLink.setOnAction(event -> showDependantOptions(dependant));
+                customerList.getChildren().add(dependantLink);
+            }
         }
-        additionalContentContainer.getChildren().add(dependantsList);
+        additionalContentContainer.getChildren().add(customerList);
     }
 
-    private void showDependantOptions(String dependant) {
+    private void showPolicyholderOptions(Policyholder policyholder){
         clearAdditionalContent();
 
-        Label titleLabel = new Label("Dependant Details: " + dependant);
-        additionalContentContainer.getChildren().add(titleLabel);
+        Label id = new Label("ID: " + policyholder.getId());
+        Label fullName = new Label("Full name: " + policyholder.getFullName());
+        Label insuranceCardNumber = new Label("Insurance Card number: " + policyholder.getInsuranceCard().getCardNumber());
 
-        // Mock data for dependant
-        String phone = "123-456-7890";
-        String address = "123 Main St, City";
-        String email = "dependant@example.com";
-        String password = "password";
-
-        Label phoneLabel = new Label("Phone: " + phone);
-        Label addressLabel = new Label("Address: " + address);
-        Label emailLabel = new Label("Email: " + email);
-        Label passwordLabel = new Label("Password: " + password);
-
-        VBox dependantDetails = new VBox(5);
-        dependantDetails.getChildren().addAll(phoneLabel, addressLabel, emailLabel, passwordLabel);
+        VBox userInfo = new VBox(5);
+        userInfo.getChildren().addAll(id, fullName, insuranceCardNumber);
 
         Button updateButton = new Button("Update");
-        updateButton.setOnAction(event -> enableDependantEditing(dependantDetails, phone, address, email, password));
+        updateButton.setOnAction(event -> enablePolicyholderEditing(userInfo, policyholder));
+
+        additionalContentContainer.getChildren().addAll(userInfo, updateButton);
+    }
+
+    private void enablePolicyholderEditing(VBox detailsContainer, Policyholder policyholder) {
+        clearAdditionalContent();
+        detailsContainer.getChildren().clear();
+
+        TextField fullName = new TextField(policyholder.getFullName());
+
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            savePolicyholderInfo(detailsContainer, policyholder, fullName.getText());
+        });
+
+        detailsContainer.getChildren().addAll(
+                new Label("Full name:"), fullName,
+                saveButton
+        );
+
+        additionalContentContainer.getChildren().add(detailsContainer);
+    }
+
+    private void savePolicyholderInfo(VBox detailsContainer, Policyholder policyholder, String fullName) {
+        detailsContainer.getChildren().clear();
+
+        policyholder.setFullName(fullName);
+        PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
+        policyholderService.update(policyholder);
+
+        Label fullNameLabel = new Label("Full name: " + fullName);
+
+        detailsContainer.getChildren().addAll(fullNameLabel);
+    }
+
+    private void showDependantOptions(Dependant dependant) {
+        clearAdditionalContent();
+
+        Label titleLabel = new Label("Dependant Details: " + dependant.getFullName());
+        additionalContentContainer.getChildren().add(titleLabel);
+
+        Label id = new Label("ID: " + dependant.getId());
+        Label fullName = new Label("Full name: " + dependant.getFullName());
+        Label insuranceCardNumber = new Label("Insurance Card number: " + dependant.getInsuranceCard().getCardNumber());
+
+        VBox dependantDetails = new VBox(5);
+        dependantDetails.getChildren().addAll(id, fullName, insuranceCardNumber);
+
+        Button updateButton = new Button("Update");
+        updateButton.setOnAction(event -> enableDependantEditing(dependantDetails, dependant));
 
         additionalContentContainer.getChildren().addAll(dependantDetails, updateButton);
     }
 
-    private void enableDependantEditing(VBox detailsContainer, String phone, String address, String email, String password) {
+    private void enableDependantEditing(VBox detailsContainer, Dependant dependant) {
+        clearAdditionalContent();
         detailsContainer.getChildren().clear();
 
-        TextField phoneField = new TextField(phone);
-        TextField addressField = new TextField(address);
-        TextField emailField = new TextField(email);
-        TextField passwordField = new TextField(password);
+        TextField fullName = new TextField(dependant.getFullName());
 
         Button saveButton = new Button("Save");
-        saveButton.setOnAction(event -> saveDependantInfo(detailsContainer, phoneField.getText(), addressField.getText(), emailField.getText(), passwordField.getText()));
+        saveButton.setOnAction(event -> {
+            saveDependantInfo(detailsContainer, dependant, fullName.getText());
+        });
 
         detailsContainer.getChildren().addAll(
-                new Label("Phone:"), phoneField,
-                new Label("Address:"), addressField,
-                new Label("Email:"), emailField,
-                new Label("Password:"), passwordField,
+                new Label("Full name:"), fullName,
                 saveButton
         );
+
+        additionalContentContainer.getChildren().add(detailsContainer);
     }
 
-    private void saveDependantInfo(VBox detailsContainer, String phone, String address, String email, String password) {
+    private void saveDependantInfo(VBox detailsContainer, Dependant dependant, String fullName) {
         detailsContainer.getChildren().clear();
 
-        Label phoneLabel = new Label("Phone: " + phone);
-        Label addressLabel = new Label("Address: " + address);
-        Label emailLabel = new Label("Email: " + email);
-        Label passwordLabel = new Label("Password: " + password);
+        dependant.setFullName(fullName);
+        DependantService dependantService = new DependantService(new DependantRepository(connection));
+        dependantService.update(dependant);
 
-        detailsContainer.getChildren().addAll(phoneLabel, addressLabel, emailLabel, passwordLabel);
+        Label fullNameLabel = new Label("Full name: " + fullName);
+
+        detailsContainer.getChildren().addAll(fullNameLabel);
     }
 
     private void showImageView(File file) throws IOException {
@@ -645,7 +680,10 @@ public class PolicyOwnerPageController {
     @FXML
     private void handleCalcYearlyButton() {
         clearAdditionalContent();
-        //function here
+
+        Label result = new Label("Total: $" + calculateAnnualPayment(service.getPolicyOwner()));
+
+        additionalContentContainer.getChildren().add(result);
     }
 
     private void clearAdditionalContent() {
@@ -660,6 +698,6 @@ public class PolicyOwnerPageController {
             }
         }
 
-        return totalPayment;
+        return (double) Math.round(totalPayment * 100) / 100;
     }
 }

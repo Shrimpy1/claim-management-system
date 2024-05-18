@@ -13,7 +13,7 @@
             <Label styleClass="services-label" text="Our Services" />
             <Button fx:id="selfInfoButton" onAction="#handleSelfInfoButton" styleClass="service-button" text="Self Information" />
             <Button fx:id="manageClaimsButton" onAction="#handleManageClaimsButton" styleClass="service-button" text="Manage Claims" />
-            <Button fx:id="manageDependantsButton" onAction="#handleManageDependantsButton" styleClass="service-button" text="Manage Customer" />
+            <Button fx:id="manageDependantsButton" onAction="#handleManageCustomersButton" styleClass="service-button" text="Manage Customer" />
             <Button fx:id="calcYearlyButton" text="Calculate Yearly Payment" onAction="#handleCalcYearlyButton" />
 
 

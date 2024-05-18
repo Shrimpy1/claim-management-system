@@ -35,10 +35,15 @@ import java.util.List;
 
 public class PolicyholderPageController {
     private PolicyholderService service;
+    private Connection connection;
 
     public void setService(PolicyholderService service) {
         this.service = service;
         welcomeLabel.setText("Welcome " + service.getPolicyholder().getFullName());
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     @FXML
@@ -57,10 +62,9 @@ public class PolicyholderPageController {
     private Button manageClaimsButton;
     @FXML
     private Button manageDependantsButton;
-    private List<File> uploadedFiles;
 
-    public void initialize() {
-        this.uploadedFiles = new ArrayList<>();
+    public void initialize() throws SQLException {
+        setConnection(DatabaseManager.getConnection());
     }
 
     @FXML
@@ -144,11 +148,7 @@ public class PolicyholderPageController {
 
         fileButton.setOnAction(event -> handleFileClaim());
         viewButton.setOnAction(event -> {
-            try {
-                viewClaims();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            viewClaims();
         });
 
         buttonsContainer.getChildren().addAll(fileButton, viewButton);
@@ -201,28 +201,23 @@ public class PolicyholderPageController {
                     ImageRepository.uploadFile(document);
                 }
 
-                try {
-                    Connection connection = DatabaseManager.getConnection();
-                    ClaimService claimService = new ClaimService(new ClaimRepository(connection));
-                    BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
-                    int newId = bankingInfoService.add();
-                    BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
-                    Claim claim = new Claim(claimDate, currUser, currUser.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
-                    String newClaimId = claimService.add(claim);
-                    Claim newClaim = claimService.getClaimById(newClaimId);
+                ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+                BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+                int newId = bankingInfoService.add();
+                BankingInfo newBankingInfo = bankingInfoService.getBankingInfoById(newId);
+                Claim claim = new Claim(claimDate, currUser, currUser.getInsuranceCard().getCardNumber(), examDate, documents, claimAmount, newBankingInfo);
+                String newClaimId = claimService.add(claim);
+                Claim newClaim = claimService.getClaimById(newClaimId);
 
-                    currUser.addClaim(newClaim);
-                    DependantService dependantService = new DependantService(new DependantRepository(connection));
-                    List<String> dependantIds = currUser.getDependants().stream().map(Dependant::getId).toList();
-                    for (String id : dependantIds){
-                        Dependant dependant = dependantService.getDependantById(id);
-                        dependant.addClaim(newClaim);
-                        dependantService.update(dependant);
-                    }
-                    service.update(currUser);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                currUser.addClaim(newClaim);
+                DependantService dependantService = new DependantService(new DependantRepository(connection));
+                List<String> dependantIds = currUser.getDependants().stream().map(Dependant::getId).toList();
+                for (String id : dependantIds){
+                    Dependant dependant = dependantService.getDependantById(id);
+                    dependant.addClaim(newClaim);
+                    dependantService.update(dependant);
                 }
+                service.update(currUser);
 
                 List<Hyperlink> documentLinks = new ArrayList<>();
                 for (File document : fileList) {
@@ -260,7 +255,7 @@ public class PolicyholderPageController {
         additionalContentContainer.getChildren().addAll(claimForm, saveButton);
     }
 
-    private void viewClaims() throws SQLException {
+    private void viewClaims() {
         clearAdditionalContent();
 
         List<String> claimIds = new ArrayList<>();
@@ -268,7 +263,7 @@ public class PolicyholderPageController {
             claimIds.add(claim.getId());
         }
 
-        ClaimService claimService = new ClaimService(new ClaimRepository(DatabaseManager.getConnection()));
+        ClaimService claimService = new ClaimService(new ClaimRepository(connection));
         VBox claimsList = new VBox(5);
         for (String claimId : claimIds) {
             Hyperlink claimLink = new Hyperlink(claimId);
@@ -380,15 +375,10 @@ public class PolicyholderPageController {
             claim.setClaimAmount(claimAmount);
             claim.setDocuments(documents);
 
-            try {
-                Connection connection = DatabaseManager.getConnection();
-                ClaimService claimService = new ClaimService(new ClaimRepository(connection), claim);
-                BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
-                bankingInfoService.update();
-                claimService.update();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            ClaimService claimService = new ClaimService(new ClaimRepository(connection), claim);
+            BankingInfoService bankingInfoService = new BankingInfoService(new BankingInfoRepository(connection), bankingInfo);
+            bankingInfoService.update();
+            claimService.update();
 
             List<Hyperlink> documentLinks = new ArrayList<>();
             for (String document : claim.getDocuments()){
@@ -422,7 +412,7 @@ public class PolicyholderPageController {
         additionalContentContainer.getChildren().addAll(updateForm, saveButton);
     }
 
-    public void handleManageDependantsButton() throws SQLException {
+    public void handleManageDependantsButton() {
         clearAdditionalContent();
 
         Label titleLabel = new Label("Manage Dependants");
@@ -433,7 +423,7 @@ public class PolicyholderPageController {
             dependantIds.add(dependant.getId());
         }
 
-        DependantService dependantService = new DependantService(new DependantRepository(DatabaseManager.getConnection()));
+        DependantService dependantService = new DependantService(new DependantRepository(connection));
 
         VBox dependantsList = new VBox(5);
         for (String dependantId : dependantIds) {
