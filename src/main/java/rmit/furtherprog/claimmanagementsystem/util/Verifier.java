@@ -15,8 +15,8 @@ public class Verifier {
         return claimId != null && claimId.matches("^f\\d{10}$");
     }
 
-    public static boolean verifyCardId(String cardId){
-        return cardId != null && cardId.matches("^\\d{10}$");
+    public static boolean verifyCardNumber(String cardNumber){
+        return cardNumber != null && cardNumber.matches("^\\d{10}$");
     }
 
     public static boolean verifyDate(String date){
