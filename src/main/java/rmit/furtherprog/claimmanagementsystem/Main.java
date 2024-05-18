@@ -64,6 +64,12 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(policyOwnerPage, 1000, 800));
         primaryStage.show();
     }
+    public static void showSurveyorPage() throws Exception {
+        Parent surveyorPage = FXMLLoader.load(Main.class.getResource("/SurveyorPage.fxml"));
+        primaryStage.setTitle("Surveyor Page");
+        primaryStage.setScene(new Scene(surveyorPage, 1000, 600));
+        primaryStage.show();
+    }
 
     public static void showDependantPage(DependantService service) throws Exception {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/dependant-page.fxml"));
