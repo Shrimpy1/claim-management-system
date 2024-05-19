@@ -22,6 +22,7 @@ import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.database.*;
 import rmit.furtherprog.claimmanagementsystem.service.*;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
+import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 import rmit.furtherprog.claimmanagementsystem.util.Verifier;
 
 import java.io.File;
@@ -315,6 +316,8 @@ public class PolicyOwnerPageController {
 
         VBox claimDetails = new VBox(5);
         claimDetails.getChildren().addAll(
+                new Label("Request for more Documents: " + RequestHandler.getByClaimId(claim.getId())),
+                new Label("Status: " + claim.getStatus()),
                 new Label("Claim Date: " + claim.getClaimDate()),
                 new Label("Insured Person: " + claim.getInsuredPerson().getFullName()),
                 new Label("Card Number: " + claim.getCardNumber()),
@@ -476,7 +479,7 @@ public class PolicyOwnerPageController {
 
     public void handleManageCustomersButton() {
         clearAdditionalContent();
-        Label titleLabel = new Label("Manage Dependants");
+        Label titleLabel = new Label("Manage Beneficiaries");
         additionalContentContainer.getChildren().add(titleLabel);
 
         List<String> idList = service.getPolicyOwner().getBeneficiaries().stream().filter(customer -> customer instanceof Policyholder).map(Customer::getId).toList();

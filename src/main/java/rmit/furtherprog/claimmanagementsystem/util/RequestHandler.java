@@ -30,7 +30,7 @@ public class RequestHandler {
         } catch (SQLException e){
             e.printStackTrace();
         }
-        return "No requests at the moment.";
+        return "None";
     }
 
     public static void addRequest(String claimId, String message){

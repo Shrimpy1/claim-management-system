@@ -67,6 +67,7 @@ public class LoginController {
                     int surveyorId = IdConverter.fromEmployeeId(username);
                     SurveyorService surveyorService = new SurveyorService(new SurveyorRepository(connection));
                     surveyorService.setSurveyor(surveyorService.getSurveyorById(surveyorId));
+                    Main.showSurveyorPage(surveyorService);
                     break;
                 default:
                     showAlert("Error", "Invalid user role");

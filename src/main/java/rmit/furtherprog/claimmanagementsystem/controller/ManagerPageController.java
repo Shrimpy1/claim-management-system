@@ -3,11 +3,7 @@ package rmit.furtherprog.claimmanagementsystem.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -15,11 +11,14 @@ import javafx.stage.Stage;
 import rmit.furtherprog.claimmanagementsystem.Main;
 import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
 import rmit.furtherprog.claimmanagementsystem.data.model.provider.Surveyor;
+import rmit.furtherprog.claimmanagementsystem.database.ClaimRepository;
 import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
 import rmit.furtherprog.claimmanagementsystem.database.ImageRepository;
 import rmit.furtherprog.claimmanagementsystem.database.SurveyorRepository;
+import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
 import rmit.furtherprog.claimmanagementsystem.service.ManagerService;
 import rmit.furtherprog.claimmanagementsystem.service.SurveyorService;
+import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class ManagerPageController {
     private ManagerService service;
     private Connection connection;
 
-    public void setService(rmit.furtherprog.claimmanagementsystem.service.ManagerService service) {
+    public void setService(ManagerService service) {
         this.service = service;
         welcomeLabel.setText("Welcome " + service.getManager().getName());
     }
@@ -43,6 +42,7 @@ public class ManagerPageController {
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
+
     @FXML
     private Label welcomeLabel;
     @FXML
@@ -65,12 +65,11 @@ public class ManagerPageController {
     private VBox claimsContainer;
     @FXML
     private HBox searchBox;
-    private Map<String, String> claimsData;
+    private List<Claim> claimsData;
 
     public void initialize() throws SQLException {
-      setConnection(DatabaseManager.getConnection());
+        setConnection(DatabaseManager.getConnection());
     }
-
 
     @FXML
     private void handleLogoutButtonAction(ActionEvent event) {
@@ -131,7 +130,6 @@ public class ManagerPageController {
         additionalContentContainer.getChildren().add(userInfo);
     }
 
-
     private void saveSelfInfo(String name) {
         clearAdditionalContent();
 
@@ -149,20 +147,21 @@ public class ManagerPageController {
     @FXML
     public void handleManageClaimsButton() {
         clearAdditionalContent();
+
         Label titleLabel = new Label("Manage Claims");
         additionalContentContainer.getChildren().add(titleLabel);
+
         searchBox.setVisible(false);
         claimsContainer.setVisible(false);
         searchBox.setManaged(false);
         claimsContainer.setManaged(false);
 
-        Button proposedClaimsButton = new Button("Proposed Claims");
+        Button proposedClaimsButton = new Button("View Proposed Claims");
         additionalContentContainer.getChildren().add(proposedClaimsButton);
 
         proposedClaimsButton.setOnAction(event -> handleProposedClaimsButton());
     }
 
-    @FXML
     private void handleProposedClaimsButton() {
         clearAdditionalContent();
 
@@ -175,13 +174,7 @@ public class ManagerPageController {
     }
 
     private void initializeClaimsData() {
-        claimsData = new TreeMap<>();
-        // Mock data
-        claimsData.put("Claim 1", "Claim ID: 125");
-        claimsData.put("Claim 2", "Claim ID: 278");
-        claimsData.put("Claim 3", "Claim ID: 316");
-        claimsData.put("Claim 4", "Claim ID: 467");
-        claimsData.put("Claim 5", "Claim ID: 590");
+        claimsData = service.retrieveProposedClaim();
 
         displayClaimsAsHyperlinks(claimsData);
     }
@@ -192,31 +185,18 @@ public class ManagerPageController {
         if (searchText.isEmpty()) {
             displayClaimsAsHyperlinks(claimsData);
         } else {
-            Map<String, String> searchResults = searchClaims(searchText);
+            List<Claim> searchResults = searchClaims(searchText);
             displayClaimsAsHyperlinks(searchResults);
         }
     }
 
-    private Map<String, String> searchClaims(String searchText) {
-        Map<String, String> searchResults = new TreeMap<>();
-        for (Map.Entry<String, String> entry : claimsData.entrySet()) {
-            if (entry.getValue().contains(searchText)) {
-                searchResults.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return searchResults;
-    }
-
-    private void displayClaimsAsHyperlinks(Map<String, String> claims) {
+    private void displayClaimsAsHyperlinks(List<Claim> claims) {
         claimsContainer.getChildren().clear();
 
         VBox claimsList = new VBox(5);
-        for (Map.Entry<String, String> entry : claims.entrySet()) {
-            String claimID = entry.getKey();
-            String claimInfo = entry.getValue();
-
-            Hyperlink claimLink = new Hyperlink(claimInfo);
-           // claimLink.setOnAction(event -> showClaimDetails(claimID));
+        for (Claim claim : claims) {
+            Hyperlink claimLink = new Hyperlink(claim.getId());
+            claimLink.setOnAction(event -> showClaimDetails(claim));
 
             claimsList.getChildren().add(claimLink);
         }
@@ -224,11 +204,20 @@ public class ManagerPageController {
         claimsContainer.getChildren().add(claimsList);
     }
 
+    private List<Claim> searchClaims(String searchText) {
+        List<Claim> searchResults = new ArrayList<>();
+        for (Claim claim : claimsData) {
+            if (claim.getId().contains(searchText)) {
+                searchResults.add(claim);
+            }
+        }
+        return searchResults;
+    }
+
     private void showClaimDetails(Claim claim) {
         clearAdditionalContent();
-        claimsContainer.getChildren().clear();
 
-        Label titleLabel = new Label("Claim Details: " + claim);
+        Label titleLabel = new Label("Claim Details: " + claim.getId());
         additionalContentContainer.getChildren().add(titleLabel);
 
         List<Hyperlink> documentLinks = new ArrayList<>();
@@ -247,6 +236,7 @@ public class ManagerPageController {
 
         VBox claimDetails = new VBox(5);
         claimDetails.getChildren().addAll(
+                new Label("Request for more Documents: " + RequestHandler.getByClaimId(claim.getId())),
                 new Label("Claim Date: " + claim.getClaimDate()),
                 new Label("Insured Person: " + claim.getInsuredPerson().getFullName()),
                 new Label("Card Number: " + claim.getCardNumber()),
@@ -259,7 +249,14 @@ public class ManagerPageController {
                 new Label("Banking account: " + claim.getReceiverBankingInfo().getName()),
                 new Label("Banking number: " + claim.getReceiverBankingInfo().getNumber())
         );
-        additionalContentContainer.getChildren().add(claimDetails);
+
+        Button denyButton = new Button("Deny");
+        denyButton.setOnAction(actionEvent -> handleDenyButton(claim));
+        Button approveButton = new Button("Approve");
+        approveButton.setOnAction(actionEvent -> handleApproveButton(claim));
+
+        HBox buttonContainer = new HBox(20, denyButton, approveButton);
+        additionalContentContainer.getChildren().addAll(claimDetails, buttonContainer);
     }
 
     private void showImageView(File file) throws IOException {
@@ -272,15 +269,32 @@ public class ManagerPageController {
         imageStage.setScene(scene);
         imageStage.show();
     }
-    private void handleApproveButton(String claimID) {
-        // Approve function here
+    private void handleApproveButton(Claim claim) {
+        claim.setStatusDone();
+        updateClaim(claim);
+        informationAlert("Update", "Claim Approved Successfully", "The Claim is now marked DONE.");
+        clearAdditionalContent();
     }
 
-    private void handleDenyButton(String claimID) {
-        // Deny function here
+    private void handleDenyButton(Claim claim) {
+        claim.setStatusRejected();
+        updateClaim(claim);
+        informationAlert("Update", "Claim Denied Successfully", "The Claim is now marked REJECTED.");
+        clearAdditionalContent();
     }
 
+    private void updateClaim(Claim claim){
+        ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+        claimService.update(claim);
+    }
 
+    private void informationAlert(String title, String header, String message){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        alert.showAndWait();
+    };
 
     public void handleManageSurveyorsButton() {
         clearAdditionalContent();

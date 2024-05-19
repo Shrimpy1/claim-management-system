@@ -8,14 +8,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import rmit.furtherprog.claimmanagementsystem.controller.DependantPageController;
-import rmit.furtherprog.claimmanagementsystem.controller.ManagerPageController;
-import rmit.furtherprog.claimmanagementsystem.controller.PolicyOwnerPageController;
-import rmit.furtherprog.claimmanagementsystem.controller.PolicyholderPageController;
-import rmit.furtherprog.claimmanagementsystem.service.DependantService;
-import rmit.furtherprog.claimmanagementsystem.service.ManagerService;
-import rmit.furtherprog.claimmanagementsystem.service.PolicyOwnerService;
-import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
+import rmit.furtherprog.claimmanagementsystem.controller.*;
+import rmit.furtherprog.claimmanagementsystem.service.*;
 
 public class Main extends Application {
 
@@ -28,15 +22,19 @@ public class Main extends Application {
     }
 
     public static void showLoginPage() throws Exception {
-        Parent loginPage = FXMLLoader.load(Main.class.getResource("/login-page.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/login-page.fxml"));
+        Parent loginPage = loader.load();
+
         primaryStage.setTitle("Login Page");
-        primaryStage.setScene(new Scene(loginPage, 300, 150));
+        primaryStage.setScene(new Scene(loginPage, 350, 200));
         primaryStage.show();
     }
 
 
     public static void showAdminPage() throws Exception {
-        Parent adminPage = FXMLLoader.load(Main.class.getResource("/admin-page.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/admin-page.fxml"));
+        Parent adminPage = loader.load();
+
         primaryStage.setTitle("Admin Page");
         primaryStage.setScene(new Scene(adminPage, 1000, 800));
         primaryStage.show();
@@ -66,10 +64,15 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(policyOwnerPage, 1000, 800));
         primaryStage.show();
     }
-    public static void showSurveyorPage() throws Exception {
-        Parent surveyorPage = FXMLLoader.load(Main.class.getResource("/surveyor-page.fxml"));
-        primaryStage.setTitle("Surveyor Page");
-        primaryStage.setScene(new Scene(surveyorPage, 1000, 600));
+    public static void showSurveyorPage(SurveyorService service) throws Exception {
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/surveyor-page.fxml"));
+        Parent policyOwnerPage = loader.load();
+
+        SurveyorPageController controller = loader.getController();
+        controller.setService(service);
+
+        primaryStage.setTitle("Policyholder Page");
+        primaryStage.setScene(new Scene(policyOwnerPage, 1000, 800));
         primaryStage.show();
     }
 

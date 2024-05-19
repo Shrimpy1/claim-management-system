@@ -23,6 +23,7 @@ import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
 import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
 import rmit.furtherprog.claimmanagementsystem.util.DateParsing;
+import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 import rmit.furtherprog.claimmanagementsystem.util.Verifier;
 
 import java.io.File;
@@ -296,6 +297,8 @@ public class PolicyholderPageController {
 
         VBox claimDetails = new VBox(5);
         claimDetails.getChildren().addAll(
+                new Label("Request for more Documents: " + RequestHandler.getByClaimId(claim.getId())),
+                new Label("Status: " + claim.getStatus()),
                 new Label("Claim Date: " + claim.getClaimDate()),
                 new Label("Insured Person: " + claim.getInsuredPerson().getFullName()),
                 new Label("Card Number: " + claim.getCardNumber()),

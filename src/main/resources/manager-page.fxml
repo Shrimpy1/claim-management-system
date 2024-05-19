@@ -13,7 +13,6 @@
         <Button fx:id="manageClaimsButton" text="Manage Claims" onAction="#handleManageClaimsButton"/>
         <Button fx:id="viewSurveyorsButton" text="View Surveyors" onAction="#handleManageSurveyorsButton" />
     </VBox>
-    <Button text="Proposed Claims" onAction="#handleProposedClaimsButton" visible="false"/>
     <HBox alignment="CENTER" spacing="5" fx:id="searchBox" visible="false">
         <Label text="Search Claim ID:" />
         <TextField fx:id="searchField" onAction="#handleSearchAction"/>

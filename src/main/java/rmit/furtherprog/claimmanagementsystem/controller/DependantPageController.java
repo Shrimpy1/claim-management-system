@@ -21,6 +21,7 @@ import rmit.furtherprog.claimmanagementsystem.database.DatabaseManager;
 import rmit.furtherprog.claimmanagementsystem.database.ImageRepository;
 import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
 import rmit.furtherprog.claimmanagementsystem.service.DependantService;
+import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -165,6 +166,8 @@ public class DependantPageController {
 
         VBox claimDetails = new VBox(5);
         claimDetails.getChildren().addAll(
+                new Label("Request for more Documents: " + RequestHandler.getByClaimId(claim.getId())),
+                new Label("Status: " + claim.getStatus()),
                 new Label("Claim Date: " + claim.getClaimDate()),
                 new Label("Insured Person: " + claim.getInsuredPerson().getFullName()),
                 new Label("Card Number: " + claim.getCardNumber()),

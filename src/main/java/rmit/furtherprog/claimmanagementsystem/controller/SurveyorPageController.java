@@ -1,23 +1,46 @@
-package com.example;
+package rmit.furtherprog.claimmanagementsystem.controller;
 
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.event.ActionEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import rmit.furtherprog.claimmanagementsystem.Main;
+import rmit.furtherprog.claimmanagementsystem.data.model.customer.Customer;
+import rmit.furtherprog.claimmanagementsystem.data.model.prop.Claim;
+import rmit.furtherprog.claimmanagementsystem.database.*;
+import rmit.furtherprog.claimmanagementsystem.service.ClaimService;
+import rmit.furtherprog.claimmanagementsystem.service.DependantService;
+import rmit.furtherprog.claimmanagementsystem.service.PolicyholderService;
+import rmit.furtherprog.claimmanagementsystem.service.SurveyorService;
+import rmit.furtherprog.claimmanagementsystem.util.RequestHandler;
 
-import java.util.TreeMap;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SurveyorPageController {
+    private SurveyorService service;
+    private Connection connection;
+
+    public void setService(SurveyorService service) {
+        this.service = service;
+        welcomeLabel.setText("Welcome " + service.getSurveyor().getName());
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
     @FXML
     private Label welcomeLabel;
     @FXML
@@ -37,26 +60,18 @@ public class SurveyorPageController {
     @FXML
     private TextField searchField;
     @FXML
-    private VBox claimsContainer;
+    private VBox infoContainer;
+    @FXML
+    private ScrollPane infoScrollContainer;
     @FXML
     private HBox searchBox;
-    private Map<String, String> claimsData;
+    private List<Claim> claimsData;
+    private List<Customer> customersData;
 
-    public void initialize() {
-        String loggedInUserName = getLoggedInUserName(); // Name method
-        if (loggedInUserName != null && !loggedInUserName.isEmpty()) {
-            welcomeLabel.setText("Welcome Back, " + loggedInUserName);
-        } else {
-            welcomeLabel.setText("Welcome!");
-        }
-
-        searchField.setOnAction(this::handleSearchAction);  // Add search action handler
-    }
-
-    // Name fetch logic
-    private String getLoggedInUserName() {
-        // Placeholder
-        return "Surveyor";
+    public void initialize() throws SQLException {
+        setConnection(DatabaseManager.getConnection());
+        claimsData = new ArrayList<>();
+        customersData = new ArrayList<>();
     }
 
     @FXML
@@ -74,9 +89,9 @@ public class SurveyorPageController {
         Label titleLabel = new Label("Self Information");
         additionalContentContainer.getChildren().add(titleLabel);
         searchBox.setVisible(false);
-        claimsContainer.setVisible(false);
+        infoScrollContainer.setVisible(false);
         searchBox.setManaged(false);
-        claimsContainer.setManaged(false);
+        infoScrollContainer.setManaged(false);
 
         HBox buttonsContainer = new HBox(10);
         Button viewButton = new Button("View");
@@ -91,21 +106,11 @@ public class SurveyorPageController {
     private void showSelfInfo() {
         clearAdditionalContent();
 
-        // Mock data for user
-        String name = "User Name";
-        String phone = "123-456-7890";
-        String address = "123 Main St, City";
-        String email = "user@example.com";
-        String password = "password";
-
-        Label nameLabel = new Label("Name: " + name);
-        Label phoneLabel = new Label("Phone: " + phone);
-        Label addressLabel = new Label("Address: " + address);
-        Label emailLabel = new Label("Email: " + email);
-        Label passwordLabel = new Label("Password: " + password);
+        Label id = new Label("ID: " + service.getSurveyor().getId());
+        Label fullName = new Label("Full name: " + service.getSurveyor().getName());
 
         VBox userInfo = new VBox(5);
-        userInfo.getChildren().addAll(nameLabel, phoneLabel, addressLabel, emailLabel, passwordLabel);
+        userInfo.getChildren().addAll(id, fullName);
 
         additionalContentContainer.getChildren().add(userInfo);
     }
@@ -113,46 +118,30 @@ public class SurveyorPageController {
     private void enableSelfInfoEditing() {
         clearAdditionalContent();
 
-        String name = "User Name";
-        String phone = "123-456-7890";
-        String address = "123 Main St, City";
-        String email = "user@example.com";
-        String password = "password";
-
-        // Info to text field
-        TextField nameField = new TextField(name);
-        TextField phoneField = new TextField(phone);
-        TextField addressField = new TextField(address);
-        TextField emailField = new TextField(email);
-        TextField passwordField = new TextField(password);
+        TextField nameField = new TextField(service.getSurveyor().getName());
 
         Button saveButton = new Button("Save");
-        saveButton.setOnAction(event -> saveSelfInfo(nameField.getText(), phoneField.getText(), addressField.getText(), emailField.getText(), passwordField.getText()));
+        saveButton.setOnAction(event -> saveSelfInfo(nameField.getText()));
 
         VBox userInfo = new VBox(5);
         userInfo.getChildren().addAll(
-                new Label("Name:"), nameField,
-                new Label("Phone:"), phoneField,
-                new Label("Address:"), addressField,
-                new Label("Email:"), emailField,
-                new Label("Password:"), passwordField,
+                new Label("Full name:"), nameField,
                 saveButton
         );
 
         additionalContentContainer.getChildren().add(userInfo);
     }
 
-    private void saveSelfInfo(String name, String phone, String address, String email, String password) {
+    private void saveSelfInfo(String name) {
         clearAdditionalContent();
 
-        Label nameLabel = new Label("Name: " + name);
-        Label phoneLabel = new Label("Phone: " + phone);
-        Label addressLabel = new Label("Address: " + address);
-        Label emailLabel = new Label("Email: " + email);
-        Label passwordLabel = new Label("Password: " + password);
+        service.getSurveyor().setName(name);
+        service.update();
+
+        Label nameLabel = new Label("Full name: " + name);
 
         VBox userInfo = new VBox(5);
-        userInfo.getChildren().addAll(nameLabel, phoneLabel, addressLabel, emailLabel, passwordLabel);
+        userInfo.getChildren().addAll(nameLabel);
 
         additionalContentContainer.getChildren().add(userInfo);
     }
@@ -160,156 +149,126 @@ public class SurveyorPageController {
     @FXML
     public void handleManageClaimsButton() {
         clearAdditionalContent();
+
         Label titleLabel = new Label("Manage Claims");
         additionalContentContainer.getChildren().add(titleLabel);
+
         searchBox.setVisible(false);
-        claimsContainer.setVisible(false);
+        infoScrollContainer.setVisible(false);
         searchBox.setManaged(false);
-        claimsContainer.setManaged(false);
+        infoScrollContainer.setManaged(false);
 
         HBox buttonsContainer = new HBox(10);
-        Button reviewClaimsButton = new Button("Review Claims");
-        Button proposedClaimsButton = new Button("Proposed Claims");
-        buttonsContainer.getChildren().add(reviewClaimsButton);
-        buttonsContainer.getChildren().add(proposedClaimsButton);
+        Button viewBtn = new Button("Proposed Claims");
+        viewBtn.setOnAction(actionEvent -> handleReviewClaimsButton());
+
+        buttonsContainer.getChildren().add(viewBtn);
         additionalContentContainer.getChildren().add(buttonsContainer);
-
-        reviewClaimsButton.setOnAction(event -> handleReviewClaimsButton());
-        proposedClaimsButton.setOnAction(event -> handleProposedClaimsButton());
     }
-
-    @FXML
+    
     private void handleReviewClaimsButton() {
         clearAdditionalContent();
 
         searchBox.setVisible(true);
-        claimsContainer.setVisible(true);
+        infoScrollContainer.setVisible(true);
         searchBox.setManaged(true);
-        claimsContainer.setManaged(true);
+        infoScrollContainer.setManaged(true);
 
         initializeClaimsData();
     }
 
     private void initializeClaimsData() {
-        claimsData = new TreeMap<>();
-        // Mock data
-        claimsData.put("Claim 1", "Claim ID: 125");
-        claimsData.put("Claim 2", "Claim ID: 278");
-        claimsData.put("Claim 3", "Claim ID: 316");
-        claimsData.put("Claim 4", "Claim ID: 467");
-        claimsData.put("Claim 5", "Claim ID: 590");
+        ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+        claimsData = claimService.getNewClaims();
 
-        displayClaims(claimsData);
+        displayClaimsAsHyperlinks(claimsData);
     }
 
     @FXML
     private void handleSearchAction(ActionEvent event) {
         String searchText = searchField.getText().trim();
         if (searchText.isEmpty()) {
-            displayClaims(claimsData);
+            displayClaimsAsHyperlinks(claimsData);
         } else {
-            Map<String, String> searchResults = searchClaims(searchText);
-            displayClaims(searchResults);
+            List<Claim> searchResults = searchClaims(searchText);
+            displayClaimsAsHyperlinks(searchResults);
         }
     }
 
-    private Map<String, String> searchClaims(String searchText) {
-        Map<String, String> searchResults = new TreeMap<>();
-        String lowerCaseSearchText = searchText.toLowerCase();
-        for (Map.Entry<String, String> entry : claimsData.entrySet()) {
-            if (entry.getValue().toLowerCase().contains(lowerCaseSearchText)) {
-                searchResults.put(entry.getKey(), entry.getValue());
+    private List<Claim> searchClaims(String searchText) {
+        List<Claim> searchResults = new ArrayList<>();
+        for (Claim claim : claimsData) {
+            if (claim.getId().contains(searchText)) {
+                searchResults.add(claim);
             }
         }
         return searchResults;
     }
 
-    private void displayClaims(Map<String, String> claims) {
-        claimsContainer.getChildren().clear();
+    private void displayClaimsAsHyperlinks(List<Claim> claims) {
+        infoContainer.getChildren().clear();
 
-        for (Map.Entry<String, String> entry : claims.entrySet()) {
-            String claimID = entry.getKey();
-            String claimInfo = entry.getValue();
-
-            Label claimLabel = new Label(claimInfo);
-            Button proposeButton = new Button("Propose");
-            Button requestInfoButton = new Button("Request More Information");
-
-            proposeButton.setOnAction(event -> handleProposeButton(claimID));
-            requestInfoButton.setOnAction(event -> handleRequestInfoButton(claimID));
-
-            HBox claimBox = new HBox(10);
-            claimBox.getChildren().addAll(claimLabel, proposeButton, requestInfoButton);
-            claimsContainer.getChildren().add(claimBox);
-        }
-    }
-
-    private void handleProposedClaimsButton() {
-        clearAdditionalContent();
-
-        String[] claims = {"Claim 1", "Claim 2", "Claim 3"};
         VBox claimsList = new VBox(5);
-        for (String claim : claims) {
-            Hyperlink claimLink = new Hyperlink(claim);
+        for (Claim claim : claims) {
+            Hyperlink claimLink = new Hyperlink(claim.getId());
             claimLink.setOnAction(event -> showClaimDetails(claim));
+
             claimsList.getChildren().add(claimLink);
         }
-        additionalContentContainer.getChildren().add(claimsList);
+
+        infoContainer.getChildren().add(claimsList);
     }
 
-    private void showClaimDetails(String claim) {
+    private void showClaimDetails(Claim claim) {
         clearAdditionalContent();
+        infoContainer.getChildren().clear();
 
-        Label titleLabel = new Label("Claim Details: " + claim);
+        Label titleLabel = new Label("Claim Details: " + claim.getId());
         additionalContentContainer.getChildren().add(titleLabel);
 
-        String claimDate = "2024-05-20";
-        String insuredPerson = "John Doe";
-        String cardNumber = "1234 5678 9012 3456";
-        String examDate = "2024-05-25";
-        String documents = "sample-document.pdf";
-        String claimAmount = "$1000";
-        String receiverBankingInfo = "Bank Name: ABC Bank, Account Number: 1234567890";
-
-        Hyperlink documentLink = new Hyperlink(documents);
-        documentLink.setOnAction(event -> showImageView(documents));
-
-        Label claimDateLabel = new Label("Claim Date: " + claimDate);
-        Label insuredPersonLabel = new Label("Insured Person: " + insuredPerson);
-        Label cardNumberLabel = new Label("Card Number: " + cardNumber);
-        Label examDateLabel = new Label("Exam Date: " + examDate);
-        Label documentLabel = new Label("Document: ");
-        Label claimAmountLabel = new Label("Claim Amount: " + claimAmount);
-        Label receiverBankingInfoLabel = new Label("Receiver Banking Info: " + receiverBankingInfo);
-
-        Button proposeButton = new Button("Propose");
-        Button requestInfoButton = new Button("Request More Information");
-
-        proposeButton.setOnAction(event -> handleProposeButton(claim));
-        requestInfoButton.setOnAction(event -> handleRequestInfoButton(claim));
-
-        HBox buttonsContainer = new HBox(10);
-        buttonsContainer.getChildren().addAll(proposeButton, requestInfoButton);
+        List<Hyperlink> documentLinks = new ArrayList<>();
+        for (String document : claim.getDocuments()){
+            Hyperlink documentLink = new Hyperlink(document);
+            documentLink.setOnAction(actionEvent -> {
+                try {
+                    File file = ImageRepository.getFile(document);
+                    showImageView(file);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            documentLinks.add(documentLink);
+        }
 
         VBox claimDetails = new VBox(5);
         claimDetails.getChildren().addAll(
-                claimDateLabel,
-                insuredPersonLabel,
-                cardNumberLabel,
-                examDateLabel,
-                documentLabel,
-                documentLink,
-                claimAmountLabel,
-                receiverBankingInfoLabel,
-                buttonsContainer
+                new Label("Request for more Documents: " + RequestHandler.getByClaimId(claim.getId())),
+                new Label("Status: " + claim.getStatus()),
+                new Label("Claim Date: " + claim.getClaimDate()),
+                new Label("Insured Person: " + claim.getInsuredPerson().getFullName()),
+                new Label("Card Number: " + claim.getCardNumber()),
+                new Label("Exam Date: " + claim.getExamDate()),
+                new Label("Documents: "));
+        claimDetails.getChildren().addAll(documentLinks);
+        claimDetails.getChildren().addAll(
+                new Label("Claim Amount: " + claim.getClaimAmount()),
+                new Label("Bank: " + claim.getReceiverBankingInfo().getBank()),
+                new Label("Bank account: " + claim.getReceiverBankingInfo().getName()),
+                new Label("Bank number: " + claim.getReceiverBankingInfo().getNumber())
         );
 
-        additionalContentContainer.getChildren().add(claimDetails);
+        Button requestInfoBtn = new Button("Request More Information");
+        requestInfoBtn.setOnAction(actionEvent -> handleRequestInfoButton(claim));
+        Button proposeBtn = new Button("Propose Claim");
+        proposeBtn.setOnAction(actionEvent -> handleProposeButton(claim));
+        HBox btnContainer = new HBox(20, requestInfoBtn, proposeBtn);
+
+        additionalContentContainer.getChildren().addAll(claimDetails, btnContainer);
     }
 
-    private void showImageView(String document) {
+    private void showImageView(File file) throws IOException {
         Stage imageStage = new Stage();
-        ImageView imageView = new ImageView(new Image("file:" + document));
+        ImageView imageView = new ImageView(ImageRepository.renderPdfImage(file));
         imageView.setFitWidth(600);
         imageView.setFitHeight(800);
         VBox vbox = new VBox(imageView);
@@ -318,13 +277,60 @@ public class SurveyorPageController {
         imageStage.show();
     }
 
-    private void handleProposeButton(String claimID) {
-        // Propose function here :D
+    private void handleProposeButton(Claim claim) {
+        if (service.getSurveyor().getProposedClaim().contains(claim)){
+            informationAlert("Error", "Proposed Claim", "This claim is already in your proposed claim.");
+        } else {
+            claim.setStatusProcessing();
+            updateClaim(claim);
+            service.getSurveyor().proposeClaim(claim);
+            service.update();
+        }
     }
 
-    private void handleRequestInfoButton(String claimID) {
-        // Request more information function here :D
+    private void handleRequestInfoButton(Claim claim) {
+        String message = openPopup();
+        RequestHandler.addRequest(claim.getId(), message);
+
+        additionalContentContainer.getChildren().clear();
     }
+
+    private String openPopup() {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Popup");
+
+        TextField textField = new TextField();
+        Button submitButton = new Button("Submit");
+        submitButton.setOnAction(e -> {
+            if (!textField.getText().isEmpty()){
+                popupStage.close();
+            }
+        });
+
+        VBox popupLayout = new VBox(10);
+        popupLayout.setPadding(new Insets(10));
+        popupLayout.getChildren().addAll(textField, submitButton);
+
+        Scene popupScene = new Scene(popupLayout, 250, 150);
+        popupStage.setScene(popupScene);
+        popupStage.showAndWait();
+
+        return textField.getText();
+    }
+
+    private void updateClaim(Claim claim){
+        ClaimService claimService = new ClaimService(new ClaimRepository(connection));
+        claimService.update(claim);
+    }
+
+    private void informationAlert(String title, String header, String message){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        alert.showAndWait();
+    };
 
     @FXML
     public void handleManageCustomersButton() {
@@ -332,41 +338,67 @@ public class SurveyorPageController {
 
         Label titleLabel = new Label("Manage Customers");
         additionalContentContainer.getChildren().add(titleLabel);
-        searchBox.setVisible(false);
-        claimsContainer.setVisible(false);
-        searchBox.setManaged(false);
-        claimsContainer.setManaged(false);
 
-        String[] customers = {"Customer 1", "Customer 2", "Customer 3"};
-        VBox customersList = new VBox(5);
-        for (String customer : customers) {
-            Hyperlink customerLink = new Hyperlink(customer);
-            customerLink.setOnAction(event -> showCustomerDetails(customer));
-            customersList.getChildren().add(customerLink);
-        }
-        additionalContentContainer.getChildren().add(customersList);
+        searchBox.setVisible(false);
+        infoScrollContainer.setVisible(false);
+        searchBox.setManaged(false);
+        infoScrollContainer.setManaged(false);
+
+        HBox buttonsContainer = new HBox(10);
+        Button viewBtn = new Button("View Customers");
+        viewBtn.setOnAction(actionEvent -> handleReviewCustomersButton());
+
+        buttonsContainer.getChildren().add(viewBtn);
+        additionalContentContainer.getChildren().add(buttonsContainer);
     }
 
-    private void showCustomerDetails(String customer) {
+    private void handleReviewCustomersButton() {
         clearAdditionalContent();
 
-        Label titleLabel = new Label("Customer Details: " + customer);
+        searchBox.setVisible(true);
+        infoScrollContainer.setVisible(true);
+        searchBox.setManaged(true);
+        infoScrollContainer.setManaged(true);
+
+        initializeCustomersData();
+    }
+
+    private void initializeCustomersData() {
+        PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
+        DependantService dependantService = new DependantService(new DependantRepository(connection));
+        customersData.addAll(dependantService.getAllDependants());
+        customersData.addAll(policyholderService.getAllPolicyholder());
+
+        displayCustomersAsHyperlinks(customersData);
+    }
+
+    private void displayCustomersAsHyperlinks(List<Customer> customers) {
+        infoContainer.getChildren().clear();
+
+        VBox customerList = new VBox(5);
+        for (Customer customer : customers) {
+            Hyperlink claimLink = new Hyperlink(customer.getFullName());
+            claimLink.setOnAction(event -> showCustomerDetails(customer));
+
+            customerList.getChildren().add(claimLink);
+        }
+
+        infoContainer.getChildren().add(customerList);
+    }
+
+    private void showCustomerDetails(Customer customer) {
+        clearAdditionalContent();
+        infoContainer.getChildren().clear();
+
+        Label titleLabel = new Label("Customer Details: " + customer.getFullName());
         additionalContentContainer.getChildren().add(titleLabel);
 
-        String name = "John Doe";
-        String address = "123 Main St, City";
-        String phone = "123-456-7890";
-        String email = "customer@example.com";
-        String dob = "01-01-1980";
-
-        Label nameLabel = new Label("Name: " + name);
-        Label addressLabel = new Label("Address: " + address);
-        Label phoneLabel = new Label("Phone: " + phone);
-        Label emailLabel = new Label("Email: " + email);
-        Label dobLabel = new Label("Date of Birth: " + dob);
+        Label id = new Label("ID: " + customer.getId());
+        Label fullName = new Label("Full name: " + customer.getFullName());
+        Label insuranceCardNumber = new Label("Insurance Card number: " + customer.getInsuranceCard().getCardNumber());
 
         VBox customerDetails = new VBox(5);
-        customerDetails.getChildren().addAll(nameLabel, addressLabel, phoneLabel, emailLabel, dobLabel);
+        customerDetails.getChildren().addAll(id, fullName, insuranceCardNumber);
 
         additionalContentContainer.getChildren().addAll(customerDetails);
     }

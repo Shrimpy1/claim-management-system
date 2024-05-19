@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.SurveyorPageController">
+<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rmit.furtherprog.claimmanagementsystem.controller.SurveyorPageController">
     <Label fx:id="welcomeLabel" text="Welcome" />
     <Button fx:id="logoutButton" text="Logout" onAction="#handleLogoutButtonAction" />
     <VBox alignment="CENTER" spacing="10">
@@ -13,13 +13,14 @@
         <Button fx:id="manageClaimsButton" text="Manage Claims" onAction="#handleManageClaimsButton"/>
         <Button fx:id="manageCustomersButton" text="Manage Customers" onAction="#handleManageCustomersButton" />
     </VBox>
-    <Button fx:id="reviewClaimsButton" text="Review Claims" onAction="#handleReviewClaimsButton" visible="false"/>
     <HBox alignment="CENTER" spacing="5" fx:id="searchBox" visible="false">
         <Label text="Search Claim ID:" />
         <TextField fx:id="searchField" onAction="#handleSearchAction"/>
     </HBox>
-    <VBox fx:id="claimsContainer" alignment="CENTER" spacing="10" visible="false">
+    <ScrollPane fx:id="infoScrollContainer" maxHeight="600" visible="false">
+    <VBox fx:id="infoContainer" alignment="CENTER" spacing="10">
     </VBox>
+    </ScrollPane>
     <VBox fx:id="additionalContentContainer" alignment="CENTER" spacing="10"/>
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />

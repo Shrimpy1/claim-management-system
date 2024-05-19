@@ -63,9 +63,15 @@ public class ManagerService {
     public List<Claim> retrieveProposedClaim(Manager manager){
         List<Claim> claimList = new ArrayList<Claim>();
         for (Surveyor surveyor : manager.getSurveyors()){
-            for (Claim claim : surveyor.getProposedClaim()){
-                claimList.add(claim);
-            }
+            claimList.addAll(surveyor.getProposedClaim());
+        }
+        return claimList;
+    }
+
+    public List<Claim> retrieveProposedClaim(){
+        List<Claim> claimList = new ArrayList<Claim>();
+        for (Surveyor surveyor : manager.getSurveyors()){
+            claimList.addAll(surveyor.getProposedClaim());
         }
         return claimList;
     }
