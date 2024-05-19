@@ -67,7 +67,7 @@ public class Main extends Application {
         primaryStage.show();
     }
     public static void showSurveyorPage() throws Exception {
-        Parent surveyorPage = FXMLLoader.load(Main.class.getResource("/SurveyorPage.fxml"));
+        Parent surveyorPage = FXMLLoader.load(Main.class.getResource("/surveyor-page.fxml"));
         primaryStage.setTitle("Surveyor Page");
         primaryStage.setScene(new Scene(surveyorPage, 1000, 600));
         primaryStage.show();
