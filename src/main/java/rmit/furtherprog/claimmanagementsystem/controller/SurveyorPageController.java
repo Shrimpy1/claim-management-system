@@ -70,8 +70,6 @@ public class SurveyorPageController {
 
     public void initialize() throws SQLException {
         setConnection(DatabaseManager.getConnection());
-        claimsData = new ArrayList<>();
-        customersData = new ArrayList<>();
     }
 
     @FXML
@@ -178,8 +176,9 @@ public class SurveyorPageController {
     }
 
     private void initializeClaimsData() {
+        claimsData = new ArrayList<>();
         ClaimService claimService = new ClaimService(new ClaimRepository(connection));
-        claimsData = claimService.getNewClaims();
+        claimsData.addAll(claimService.getNewClaims());
 
         displayClaimsAsHyperlinks(claimsData);
     }
@@ -222,6 +221,11 @@ public class SurveyorPageController {
     private void showClaimDetails(Claim claim) {
         clearAdditionalContent();
         infoContainer.getChildren().clear();
+
+        searchBox.setVisible(false);
+        infoScrollContainer.setVisible(false);
+        searchBox.setManaged(false);
+        infoScrollContainer.setManaged(false);
 
         Label titleLabel = new Label("Claim Details: " + claim.getId());
         additionalContentContainer.getChildren().add(titleLabel);
@@ -364,6 +368,7 @@ public class SurveyorPageController {
     }
 
     private void initializeCustomersData() {
+        customersData = new ArrayList<>();
         PolicyholderService policyholderService = new PolicyholderService(new PolicyholderRepository(connection));
         DependantService dependantService = new DependantService(new DependantRepository(connection));
         customersData.addAll(dependantService.getAllDependants());

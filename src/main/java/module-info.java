@@ -9,7 +9,6 @@ module rmit.furtherprog.claimmanagementsystem {
     requires software.amazon.awssdk.core;
     requires org.apache.pdfbox;
     requires java.desktop;
-    requires javafx.swing;
 
 
     opens rmit.furtherprog.claimmanagementsystem to javafx.fxml;

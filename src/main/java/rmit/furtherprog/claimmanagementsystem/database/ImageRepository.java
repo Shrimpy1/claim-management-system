@@ -17,11 +17,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.core.ResponseBytes;
 import org.apache.pdfbox.pdmodel.PDDocument;
-
 import java.awt.image.BufferedImage;
-
-import javafx.embed.swing.SwingFXUtils;
-
 import javax.imageio.ImageIO;
 
 public class ImageRepository {
@@ -88,7 +84,7 @@ public class ImageRepository {
         ImageIO.write(bufferedImage, "png", outputStream);
         byte[] byteArray = outputStream.toByteArray();
 
-        Image pdfImage = SwingFXUtils.toFXImage(bufferedImage, null);
+        Image pdfImage = new Image(new ByteArrayInputStream(byteArray));
 
         document.close();
 

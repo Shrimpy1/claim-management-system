@@ -174,7 +174,8 @@ public class ManagerPageController {
     }
 
     private void initializeClaimsData() {
-        claimsData = service.retrieveProposedClaim();
+        claimsData = new ArrayList<>();
+        claimsData.addAll(service.retrieveProposedClaim());
 
         displayClaimsAsHyperlinks(claimsData);
     }
