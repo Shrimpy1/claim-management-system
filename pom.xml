@@ -13,6 +13,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 <junit.version>5.9.2</junit.version>  </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>claim-management-system</id>
+      <name>Claim Management System</name>
+      <url>https://github.com/Shrimpy1/claim-management-system.git</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.openjfx</groupId>
